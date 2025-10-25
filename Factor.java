@@ -3,7 +3,7 @@
  *
  * @author Alec Kingsley
  */
-public sealed interface Factor permits Factor.Var, Factor.Const, Factor.Str, Factor.Call {
+public sealed interface Factor permits Factor.Var, Factor.Const, Factor.Str, Factor.Parentheses, Factor.Call {
 	final class Var extends Parsable implements Factor {
 		/** variable */
 		private Variable variable;
@@ -45,6 +45,13 @@ public sealed interface Factor permits Factor.Var, Factor.Const, Factor.Str, Fac
 		@Override
 		public String toString() {
 			return "\"" + string + "\"";
+		}
+	}
+
+	public record Parentheses(Expression expression, int lineIdx, int charIdx) implements Factor {
+		@Override
+		public String toString() {
+			return "(" + string + ")";
 		}
 	}
 

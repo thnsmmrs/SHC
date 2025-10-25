@@ -7,10 +7,10 @@
  * All of its children should be final.
  */
 public sealed class Parsable permits
-	Function, Variable, Statement, Factor.Var,
+	Expression, Function, Variable, Statement, Factor.Var,
 	Assignment, OrExpression, AndExpression, EqualityExpression,
 	RelationalExpression, AdditiveExpression, MultiplicativeExpression,
-	UnaryExpression, PostFixExpression {
+	UnaryExpression {
 
 	/** the line of the parsable thing */
 	private int lineIdx;

@@ -19,14 +19,10 @@
                     ;
 
 <declarator> ::= ID
-               |  <declarator> <array-suffix>
+			   | "^" <declarator>
                ;
 
-<array-suffix> ::= "[" <constant-expression-opt> "]"
-                 |  <array-suffix> "[" <constant-expression-opt> "]"
-                 ;
-
-<constant-expression-opt> ::= <constant-expression>
+<constant-expression-opt> ::= <logical-or-expression>
                             |  ε
                             ;
 
@@ -126,6 +122,8 @@
                           |  <relational-expression> ">=" <additive-expression>
                           |  <additive-expression>
                           ;
+						PostFix, Unary
+
 
 <additive-expression> ::= <additive-expression> "+" <multiplicative-expression>
                         |  <additive-expression> "-" <multiplicative-expression>
@@ -139,20 +137,20 @@
                               ;
 
 <unary-expression> ::= <unary-operator> <unary-expression>
-                     |  <postfix-expression>
+                     |  <factor>
                      ;
 
-<unary-operator> ::= "!"
-                   |  "+"
+<unary-operator> ::=  "+"
                    |  "-"
-                   |  "*"
-                   |  "&"
                    ;
-
-<postfix-expression> ::= <postfix-expression> "[" <expression> "]"
-                       |  <postfix-expression> "(" <argument-list-opt> ")"
-                       |  <primary-expression>
-                       ;
+<factor> ::= ID
+		   | ID "(" <argument-list-opt> ")"
+           |  INT_LITERAL
+           |  CHAR_LITERAL
+           |  STRING_LITERAL
+           |  BOOL_LITERAL
+           |  "(" <expression> ")"
+           ;
 
 <argument-list-opt> ::= <argument-list>
                       |  ε
@@ -162,22 +160,3 @@
                   |  <argument-list> "," <assignment-expression>
                   ;
 
-<primary-expression> ::= ID
-                       |  INT_LITERAL
-                       |  CHAR_LITERAL
-                       |  STRING_LITERAL
-                       |  BOOL_LITERAL
-                       |  "(" <expression> ")"
-                       ;
-
-<constant-expression> ::= <logical-or-expression>
-                        ;
-
-<initializer> ::= <assignment-expression>
-                |  "{" <initializer-list> "}"
-                |  "{" <initializer-list> "," "}"
-                ;
-
-<initializer-list> ::= <initializer>
-                     |  <initializer-list> "," <initializer>
-                     ;
