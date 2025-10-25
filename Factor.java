@@ -25,11 +25,12 @@ public sealed interface Factor permits Factor.Var, Factor.Const, Factor.Str, Fac
 
 		@Override
 		public String toString() {
-			name = "";
+			String name = "";
 			for (int i = 0; i < nReferences; i++) {
 				name += "^";
 			}
 			name += variable.toString();
+			return name;
 		}
 	}
 
@@ -50,8 +51,8 @@ public sealed interface Factor permits Factor.Var, Factor.Const, Factor.Str, Fac
 	public record Call(Function fun, Expression[] arguments, int lineIdx, int charIdx) implements Factor {
 		@Override
 		public String toString() {
-			value = fun.getName() + "(";
-			for (argument : arguments) {
+			String value = fun.getName() + "(";
+			for (Expression argument : arguments) {
 				value += argument.toString();
 			}
 			value += ")";

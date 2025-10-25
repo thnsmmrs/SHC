@@ -7,7 +7,7 @@
  * All of its children should be final.
  */
 public sealed class Parsable permits
-	Function, Variable {
+	Function, Variable, Factor.Var {
 	/** the line of the parsable thing */
 	private int lineIdx;
 	/** the char index within the line of the parsable thing */
