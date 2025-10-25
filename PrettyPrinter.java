@@ -121,7 +121,11 @@ public class PrettyPrinter {
 	private void printIfStatement(Statement.If ifStmt) {
 		indent();
 		append("if (");
-		append("<condition>");
+		if (ifStmt.cond() != null) {
+			append(ifStmt.cond().toString());
+		} else {
+			append("<condition>");
+		}
 		append(") {");
 		newline();
 
@@ -159,7 +163,11 @@ public class PrettyPrinter {
 	private void printLoopStatement(Statement.Loop loopStmt) {
 		indent();
 		append("while (");
-		append("<condition>");
+		if (loopStmt.cond() != null) {
+			append(loopStmt.cond().toString());
+		} else {
+			append("<condition>");
+		}
 		append(") {");
 		newline();
 
