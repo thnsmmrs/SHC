@@ -40,9 +40,9 @@ public final class Variable extends Parsable {
 	}
 
 	/**
-	 * Getter method for {@code type}
+	 * Getter method for {@code nReferences}
 	 */
-	public SHC getNReferences() {
+	public int getNReferences() {
 		return nReferences;
 	}
 
