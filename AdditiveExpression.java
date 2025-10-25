@@ -20,7 +20,7 @@ public final class AdditiveExpression extends Parsable {
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
-	public Assignment(AdditiveExpression left, SHC operator, MultiplicativeExpression right, int lineIdx, int charIdx) {
+	public AdditiveExpression(AdditiveExpression left, SHC operator, MultiplicativeExpression right, int lineIdx, int charIdx) {
 		super(lineIdx, charIdx);
 		this.left = left;
 		this.operator = operator;
@@ -34,7 +34,7 @@ public final class AdditiveExpression extends Parsable {
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
-	public Assignment(MultiplicativeExpression value, int lineIdx, int charIdx) {
+	public AdditiveExpression(MultiplicativeExpression value, int lineIdx, int charIdx) {
 		super(lineIdx, charIdx);
 		this.right = value;
 	}

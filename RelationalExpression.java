@@ -12,7 +12,7 @@ public final class RelationalExpression extends Parsable {
   private AdditiveExpression right;
   
 	/**
-	 * Constructor for the {@code Assignment} class.
+	 * Constructor for the {@code RelationalExpression} class.
 	 *
 	 * @param left - the left of the expression
 	 * @param operator - the operator of the expression
@@ -20,7 +20,7 @@ public final class RelationalExpression extends Parsable {
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
-	public Assignment(RelationalExpression left, SHC operator, AdditiveExpression right, int lineIdx, int charIdx) {
+	public RelationalExpression(RelationalExpression left, SHC operator, AdditiveExpression right, int lineIdx, int charIdx) {
 		super(lineIdx, charIdx);
 		this.left = left;
 		this.operator = operator;
@@ -28,13 +28,13 @@ public final class RelationalExpression extends Parsable {
 	}
 
 	/**
-	 * Constructor for the {@code Assignment} class.
+	 * Constructor for the {@code RelationalExpression} class.
 	 *
 	 * @param value - the value of the expression (no operator)
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
-	public Assignment(AdditiveExpression value, int lineIdx, int charIdx) {
+	public RelationalExpression(AdditiveExpression value, int lineIdx, int charIdx) {
 		super(lineIdx, charIdx);
 		this.right = value;
 	}

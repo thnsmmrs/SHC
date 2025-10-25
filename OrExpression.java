@@ -10,27 +10,27 @@ public final class OrExpression extends Parsable {
   private AndExpression right;
   
 	/**
-	 * Constructor for the {@code Assignment} class.
+	 * Constructor for the {@code OrExpression} class.
 	 *
 	 * @param left - the left of the expression
 	 * @param right - the right of the expression
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
-	public Assignment(OrExpression left, AndExpression right, int lineIdx, int charIdx) {
+	public OrExpression(OrExpression left, AndExpression right, int lineIdx, int charIdx) {
 		super(lineIdx, charIdx);
 		this.left = left;
 		this.right = right;
 	}
 
 	/**
-	 * Constructor for the {@code Assignment} class.
+	 * Constructor for the {@code OrExpression} class.
 	 *
 	 * @param value - the value of the expression (no operator)
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
-	public Assignment(AndExpression value, int lineIdx, int charIdx) {
+	public OrExpression(AndExpression value, int lineIdx, int charIdx) {
 		super(lineIdx, charIdx);
 		this.right = value;
 	}
