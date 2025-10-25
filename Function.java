@@ -4,7 +4,7 @@
  * @author Alec Kingsley
  */
 public final class Function extends Parsable {
-	/** return type of method */
+	/** return type of function */
 	private SHC returnType;
 
 	/** name of the function */

@@ -1,4 +1,4 @@
-enum SHC {
+enum Mantle {
     // Keywords
     FUN,        // "fun"
     IF,         // "if"

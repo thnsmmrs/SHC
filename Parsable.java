@@ -7,15 +7,11 @@
  * All of its children should be final.
  */
 public sealed class Parsable permits
-<<<<<<< Updated upstream
-	Function, Variable, Factor.Var {
-=======
 	Function, Variable, Factor.Var,
 	Assignment, OrExpression, AndExpression, EqualityExpression,
 	RelationalExpression, AdditiveExpression, MultiplicativeExpression,
 	UnaryExpression {
 
->>>>>>> Stashed changes
 	/** the line of the parsable thing */
 	private int lineIdx;
 	/** the char index within the line of the parsable thing */

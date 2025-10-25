@@ -1,5 +1,5 @@
 /**
- * Variable class for SHC language.
+ * Function class for SHC language.
  *
  * @author Alec Kingsley
  */
@@ -40,9 +40,9 @@ public final class Variable extends Parsable {
 	}
 
 	/**
-	 * Getter method for {@code nReferences}
+	 * Getter method for {@code type}
 	 */
-	public int getNReferences() {
+	public SHC getNReferences() {
 		return nReferences;
 	}
 
