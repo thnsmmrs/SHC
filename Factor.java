@@ -51,7 +51,7 @@ public sealed interface Factor permits Factor.Var, Factor.Const, Factor.Str, Fac
 	public record Parentheses(Expression expression, int lineIdx, int charIdx) implements Factor {
 		@Override
 		public String toString() {
-			return "(" + string + ")";
+			return "(" + expression + ")";
 		}
 	}
 
