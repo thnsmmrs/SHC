@@ -34,7 +34,7 @@ public final class UnaryExpression extends Parsable {
 	public UnaryExpression(Factor expression,
 												 int lineIdx, int charIdx) {
 		super(lineIdx, charIdx);
-		this.unaryExpression = expression;
+		this.factor = expression;
 	}
 
 	/** getter method for {@code unaryExpression} */
@@ -54,7 +54,7 @@ public final class UnaryExpression extends Parsable {
 	}
 
 	/** getter method for {@code factor} */
-	public UnaryExpression getFactor() {
+	public Factor getFactor() {
 		if (factor == null) {
 			throw new RuntimeException("expression has an operator");
 		}

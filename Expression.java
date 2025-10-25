@@ -14,7 +14,7 @@ public final class Expression extends Parsable {
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
-	public AdditiveExpression(AdditiveExpression[] expressions, int lineIdx, int charIdx) {
+	public Expression(AdditiveExpression[] expressions, int lineIdx, int charIdx) {
 		super(lineIdx, charIdx);
 		this.expressions = expressions;
 	}

@@ -9,7 +9,7 @@ public sealed interface Statement permits Statement.If, Statement.Loop, Statemen
 	 *
 	 * @param cond - condition for the if statement
 	 * @param body - main body for if statement
-	 * @param otherbody - body for else block of if statement
+	 * @param otherBody - body for else block of if statement
 	 * @param lineIdx - line index of first token
 	 * @param charIdx - character index of first token
 	 */
@@ -38,7 +38,8 @@ public sealed interface Statement permits Statement.If, Statement.Loop, Statemen
 	/**
 	 * Function Call.
 	 *
-	 * @param call - function call
+	 * @param function - function called
+	 * @param arguments - arguments to the function
 	 * @param lineIdx - line index of first token
 	 * @param charIdx - character index of first token
 	 */

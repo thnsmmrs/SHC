@@ -7,7 +7,7 @@
  * All of its children should be final.
  */
 public sealed class Parsable permits
-	Expression, Function, Variable, Statement, Factor.Var,
+	Expression, Function, Variable, Factor.Var,
 	Assignment, OrExpression, AndExpression, EqualityExpression,
 	RelationalExpression, AdditiveExpression, MultiplicativeExpression,
 	UnaryExpression {
