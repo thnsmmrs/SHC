@@ -3,7 +3,7 @@
  *
  * @author Alec Kingsley
  */
-public final class Variable extends Parsable {
+public final class Assignment extends Parsable {
 	/** thing to assign to */
   private Variable assignee = null;
   /** value to assign with */
