@@ -8,7 +8,7 @@ public final class Expression extends Parsable {
 	private AdditiveExpression[] expressions;
   
 	/**
-	 * Constructor for the {@code AdditiveExpression} class.
+	 * Constructor for the {@code Expression} class.
 	 *
 	 * @param expressions - the list of expressions
 	 * @param lineIdx - index of the line {@code Parsable} starts at

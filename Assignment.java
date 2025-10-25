@@ -54,4 +54,13 @@ public final class Assignment extends Parsable {
   public OrExpression getValue() {
   	return value;
   }
+
+	@Override
+	public String toString() {
+		if (hasAssignee()) {
+			return assignee.toString() + " = " + value.toString();
+		} else {
+			return value.toString();
+		}
+	}
 }

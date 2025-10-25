@@ -10,7 +10,7 @@ public final class UnaryExpression extends Parsable {
 	private SHC operator;
   /** right of expression */
   private Factor factor = null;
-  
+
 	/**
 	 * Constructor for the {@code UnaryExpression} class.
 	 * @param operator - the operator used on expression
@@ -66,5 +66,21 @@ public final class UnaryExpression extends Parsable {
 	 */
 	public boolean hasOperator() {
 		return factor == null;
+	}
+
+	@Override
+	public String toString() {
+		if (hasOperator()) {
+			String op = switch (operator) {
+				case NOT -> "!";
+				case SUBTRACT -> "-";
+				case AMP -> "&";
+				case MULTIPLY -> "^";
+				default -> "?";
+			};
+			return op + unaryExpression.toString();
+		} else {
+			return factor.toString();
+		}
 	}
 }
