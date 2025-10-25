@@ -1,5 +1,3 @@
-package io.github.alec_kingsley.mantle;
-
 public class Reporter {
 	/** the name of the source file */
 	private String filename;

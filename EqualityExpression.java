@@ -66,4 +66,14 @@ public final class EqualityExpression extends Parsable {
   public RelationalExpression getRight() {
   	return right;
   }
+
+	@Override
+	public String toString() {
+		if (hasLeft()) {
+			String op = (operator == SHC.EQUAL) ? "==" : "!=";
+			return left.toString() + " " + op + " " + right.toString();
+		} else {
+			return right.toString();
+		}
+	}
 }

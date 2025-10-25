@@ -66,4 +66,14 @@ public final class AdditiveExpression extends Parsable {
   public MultiplicativeExpression getRight() {
   	return right;
   }
+
+	@Override
+	public String toString() {
+		if (hasLeft()) {
+			String op = (operator == SHC.ADD) ? "+" : "-";
+			return left.toString() + " " + op + " " + right.toString();
+		} else {
+			return right.toString();
+		}
+	}
 }

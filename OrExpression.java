@@ -54,4 +54,13 @@ public final class OrExpression extends Parsable {
   public AndExpression getRight() {
   	return right;
   }
+
+	@Override
+	public String toString() {
+		if (hasLeft()) {
+			return left.toString() + " || " + right.toString();
+		} else {
+			return right.toString();
+		}
+	}
 }

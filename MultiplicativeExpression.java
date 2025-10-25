@@ -66,4 +66,19 @@ public final class MultiplicativeExpression extends Parsable {
   public UnaryExpression getRight() {
   	return right;
   }
+
+	@Override
+	public String toString() {
+		if (hasLeft()) {
+			String op = switch (operator) {
+				case MULTIPLY -> "*";
+				case DIVIDE -> "/";
+				case MOD -> "%";
+				default -> "?";
+			};
+			return left.toString() + " " + op + " " + right.toString();
+		} else {
+			return right.toString();
+		}
+	}
 }

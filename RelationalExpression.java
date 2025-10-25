@@ -66,4 +66,20 @@ public final class RelationalExpression extends Parsable {
   public AdditiveExpression getRight() {
   	return right;
   }
+
+	@Override
+	public String toString() {
+		if (hasLeft()) {
+			String op = switch (operator) {
+				case LESS -> "<";
+				case GREATER -> ">";
+				case LEQ -> "<=";
+				case GEQ -> ">=";
+				default -> "?";
+			};
+			return left.toString() + " " + op + " " + right.toString();
+		} else {
+			return right.toString();
+		}
+	}
 }
