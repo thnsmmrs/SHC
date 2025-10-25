@@ -17,20 +17,20 @@ public class Reporter {
 	}
 
 	/**
-	 * Move the {@code Scanner} to the token at {@code (lineIdx, charIdx)}.
+	 * Move the {@code SHCScanner} to the token at {@code (lineIdx, charIdx)}.
 	 *
 	 * @param scanner - the scanner to move
 	 * @param lineIdx - line of token
 	 * @param charIdx - char of token
 	 */
-	private void moveScannerToPos(Scanner scanner, int lineIdx, int charIdx) {
-		while (scanner.getLineIdx() != lineIdx && scanner.currentToken() != Mantle.EOS) {
+	private void moveSHCScannerToPos(SHCScanner scanner, int lineIdx, int charIdx) {
+		while (scanner.getLineIdx() != lineIdx && scanner.currentToken() != SHC.EOS) {
 			scanner.nextToken();
 		}
-		while (scanner.getCharIdx() != charIdx && scanner.currentToken() != Mantle.EOS) {
+		while (scanner.getCharIdx() != charIdx && scanner.currentToken() != SHC.EOS) {
 			scanner.nextToken();
 		}
-		if (scanner.currentToken() == Mantle.EOS) {
+		if (scanner.currentToken() == SHC.EOS) {
 			throw new RuntimeException("failed to move scanner to position");
 		}
 	}
@@ -64,10 +64,10 @@ public class Reporter {
 	 * @param charIdx - char of the offending token
 	 */
 	public void tokenError(String error, int lineIdx, int charIdx) {
-		var scanner = new Scanner(filename);
+		var scanner = new SHCScanner(filename);
 		printError(error);
 		System.out.println("At line " + lineIdx + ", character " + charIdx);
-		moveScannerToPos(scanner, lineIdx, charIdx);
+		moveSHCScannerToPos(scanner, lineIdx, charIdx);
 		String line = scanner.getCurrentTokenLine();
 		System.out.print(line.substring(0, charIdx));
 		// highlight offending token in red
@@ -96,10 +96,10 @@ public class Reporter {
 	 * @param charIdx - char of the offending token
 	 */
 	public void tokenWarning(String warning, int lineIdx, int charIdx) {
-		var scanner = new Scanner(filename);
+		var scanner = new SHCScanner(filename);
 		printWarning(warning);
 		System.out.println("At line " + lineIdx + ", character " + charIdx);
-		moveScannerToPos(scanner, lineIdx, charIdx);
+		moveSHCScannerToPos(scanner, lineIdx, charIdx);
 		String line = scanner.getCurrentTokenLine();
 		System.out.print(line.substring(0, charIdx));
 		// highlight offending token in yellow
