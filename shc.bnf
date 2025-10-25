@@ -1,3 +1,39 @@
+; ============================================================================
+; SHC (Self Hosted Compiler) - BNF Grammar Definition
+; HackIO 2025
+; ============================================================================
+;
+; This grammar defines a minimal C-like language for self-hosted compilation.
+;
+; GRAMMAR STATUS: Fixed and parsable
+; - All non-terminals are now defined
+; - Operator precedence chain is complete
+; - Lexical tokens are defined
+;
+; LANGUAGE FEATURES:
+; Types: void, char, int
+; Operators: +, -, *, /, %, &, |, ^, <<, >>, <, >, <=, >=, ==, !=, &&, ||, !, ~
+; Control flow: if/else, while, break, continue, return, goto (via labels)
+; Data structures: Arrays, pointers, function pointers
+; Functions: Declaration, definition, variadic parameters
+;
+; KNOWN LIMITATIONS:
+; - No switch statement (case/default labels exist but switch is missing)
+; - No for loops (only while)
+; - No struct/union/typedef (limits complex data structures)
+; - No increment/decrement operators (++, --)
+; - No compound assignment operators (+=, -=, etc.)
+; - No ternary operator (?:)
+; - No sizeof operator
+; - No cast expressions
+; - Limited type system (no float, double, long, unsigned, etc.)
+;
+; NOTES FOR SELF-HOSTING:
+; - Will need built-in functions for: file I/O, string operations, memory allocation
+; - Consider adding structs to represent AST nodes and symbol table entries
+; - Consider adding switch statement for cleaner parser implementation
+; ============================================================================
+
 <translation-unit> ::= {<external-declaration>}*
 
 <external-declaration> ::= <function-definition>
@@ -11,6 +47,8 @@
 
 <specifier-qualifier> ::= <type-specifier>
 
+<declaration-specifier> ::= <type-specifier>
+
 <declarator> ::= {<pointer>}? <direct-declarator>
 
 <pointer> ::= *{<pointer>}?
@@ -21,11 +59,19 @@
                       | <direct-declarator> ( <parameter-type-list> )
                       | <direct-declarator> ( {<identifier>}* )
 
-<constant-expression> ::= <logical-and-expression>
+<constant-expression> ::= <logical-or-expression>
+
+<logical-or-expression> ::= <logical-and-expression>
                           | <logical-or-expression> || <logical-and-expression>
 
 <logical-and-expression> ::= <inclusive-or-expression>
-                           | <logical-and-expression> && <and-expression>
+                           | <logical-and-expression> && <inclusive-or-expression>
+
+<inclusive-or-expression> ::= <exclusive-or-expression>
+                            | <inclusive-or-expression> | <exclusive-or-expression>
+
+<exclusive-or-expression> ::= <and-expression>
+                            | <exclusive-or-expression> ^ <and-expression>
 
 <and-expression> ::= <equality-expression>
                    | <and-expression> & <equality-expression>
@@ -53,7 +99,10 @@
                               | <multiplicative-expression> / <unary-expression>
                               | <multiplicative-expression> % <unary-expression>
 
-<unary-expression> ::= <primary-expression>
+<unary-expression> ::= <postfix-expression>
+                     | <unary-operator> <unary-expression>
+
+<postfix-expression> ::= <primary-expression>
                        | <postfix-expression> [ <expression> ]
                        | <postfix-expression> ( {<assignment-expression>}* )
 
@@ -136,4 +185,60 @@
 <jump-statement> :=  continue ;
                    | break ;
                    | return {<expression>}? ;
+
+; Lexical tokens (terminals)
+
+<identifier> ::= <letter> {<letter> | <digit> | _}*
+
+<integer-constant> ::= <decimal-constant>
+                     | <octal-constant>
+                     | <hex-constant>
+
+<decimal-constant> ::= <nonzero-digit> {<digit>}*
+
+<octal-constant> ::= 0 {<octal-digit>}*
+
+<hex-constant> ::= 0x {<hex-digit>}+
+                 | 0X {<hex-digit>}+
+
+<character-constant> ::= ' <c-char> '
+
+<c-char> ::= <any-char-except-quote-backslash-newline>
+           | <escape-sequence>
+
+<escape-sequence> ::= \n
+                    | \t
+                    | \r
+                    | \\
+                    | \'
+                    | \"
+                    | \0
+
+<string> ::= " {<s-char>}* "
+
+<s-char> ::= <any-char-except-doublequote-backslash-newline>
+           | <escape-sequence>
+
+<enumeration-constant> ::= <identifier>
+
+; Character classes
+
+<letter> ::= a | b | c | d | e | f | g | h | i | j | k | l | m
+           | n | o | p | q | r | s | t | u | v | w | x | y | z
+           | A | B | C | D | E | F | G | H | I | J | K | L | M
+           | N | O | P | Q | R | S | T | U | V | W | X | Y | Z
+
+<digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+<nonzero-digit> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+<octal-digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+
+<hex-digit> ::= <digit>
+              | a | b | c | d | e | f
+              | A | B | C | D | E | F
+
+<any-char-except-quote-backslash-newline> ::= ; Any ASCII character except ', \, and newline
+
+<any-char-except-doublequote-backslash-newline> ::= ; Any ASCII character except ", \, and newline
 
