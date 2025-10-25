@@ -13,7 +13,7 @@ public sealed interface Factor permits Factor.Var, Factor.Const, Factor.Str, Fac
 		/**
 		 * Constructor for a variable factor.
 		 *
-		 * @param name - name of the variable
+		 * @param variable - the variable
 		 * @param lineIdx - index of the line {@code Parsable} starts at
 		 * @param charIdx - char index in the line {@code Parsable} starts at
 		 */
@@ -51,7 +51,7 @@ public sealed interface Factor permits Factor.Var, Factor.Const, Factor.Str, Fac
 	public record Parentheses(Expression expression, int lineIdx, int charIdx) implements Factor {
 		@Override
 		public String toString() {
-			return "(" + expression + ")";
+			return "(" + expression.toString() + ")";
 		}
 	}
 
