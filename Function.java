@@ -32,7 +32,7 @@ public final class Function extends Parsable {
 	 */
 	public Function(SHC returnType, String name, Variable[] arguments, Variable[] localVariables, Statement[] body, int lineIdx, int charIdx) {
 		super(lineIdx, charIdx);
-		this.returnType = returnType;
+		this.returnTypeName = returnTypeName;
 		this.name = name;
 		this.arguments = arguments;
 		this.localVariables = localVariables;
@@ -62,5 +62,10 @@ public final class Function extends Parsable {
 	/** getter method for {@code body} */
 	public Statement[] getBody() {
 		return body;
+	}
+
+	/** getter method for {@code returnVariable} */
+	public Variable getReturnVariable() {
+		return returnVariable;
 	}
 }
