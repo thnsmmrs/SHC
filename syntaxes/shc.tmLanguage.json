@@ -1,0 +1,61 @@
+{
+    "scopeName": "source.shc",
+    "fileTypes": [
+        "shc"
+    ],
+    "name": "SHC",
+    "patterns": [
+        {
+            "name": "keyword.control.shc",
+            "match": "\\b(fun|if|else|while|return|break|continue|void|int|char|true|false)\\b"
+        },
+        {
+            "name": "constant.language.boolean.shc",
+            "match": "\\b(true|false)\\b"
+        },
+        {
+            "name": "string.quoted.double.shc",
+            "begin": "\"",
+            "end": "\"",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.shc",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        {
+            "name": "string.quoted.single.shc",
+            "begin": "'",
+            "end": "'",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.shc",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        {
+            "name": "constant.numeric.shc",
+            "match": "\\b\\d+\\b"
+        },
+        {
+            "name": "comment.line.double-slash.shc",
+            "begin": "//",
+            "end": "$"
+        },
+        {
+            "name": "comment.block.shc",
+            "begin": "/\\*",
+            "end": "\\*/"
+        },
+        {
+            "name": "keyword.operator.shc",
+            "match": "(==|!=|<=|>=|&&|\\|\\||\\+|\\-|\\*|/|%|=|<|>|!|&|\\(|\\)|\\[|\\]|\\{|\\}|,|;|:)"
+        },
+        {
+            "name": "variable.other.shc",
+            "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+    ]
+}

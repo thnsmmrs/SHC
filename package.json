@@ -1,0 +1,25 @@
+{
+  "name": "shc",
+  "displayName": "SHCsyntaxhighlight",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.105.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "shc",
+      "aliases": ["SHC", "shc"],
+      "extensions": [".shc"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "shc",
+      "scopeName": "source.shc",
+      "path": "./syntaxes/shc.tmLanguage.json"
+    }]
+  }
+}
