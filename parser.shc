@@ -218,10 +218,13 @@ fun printError(msg : ^char, line : int, col : int) : void {
  */
 fun allocStatement(type : int, size : int) : ^int {
     node : ^int;
+    temp : ^int;
     node = malloc(size);
     ^node = type;                           // node type
-    ^(node + 1) = parser_token_line;       // line
-    ^(node + 2) = parser_token_col;        // col
+    temp = node + 1;
+    ^temp = parser_token_line;              // line
+    temp = node + 2;
+    ^temp = parser_token_col;               // col
     return node;
 }
 
@@ -233,10 +236,13 @@ fun allocStatement(type : int, size : int) : ^int {
  */
 fun allocExpression(type : int, size : int) : ^int {
     node : ^int;
+    temp : ^int;
     node = malloc(size);
     ^node = type;
-    ^(node + 1) = parser_token_line;
-    ^(node + 2) = parser_token_col;
+    temp = node + 1;
+    ^temp = parser_token_line;
+    temp = node + 2;
+    ^temp = parser_token_col;
     return node;
 }
 
@@ -254,10 +260,13 @@ fun allocFunction() : ^int {
  */
 fun allocVariable() : ^int {
     node : ^int;
+    temp : ^int;
     node = malloc(VARIABLE_SIZE());
     ^node = NODE_VARIABLE();
-    ^(node + 1) = parser_token_line;
-    ^(node + 2) = parser_token_col;
+    temp = node + 1;
+    ^temp = parser_token_line;
+    temp = node + 2;
+    ^temp = parser_token_col;
     return node;
 }
 
