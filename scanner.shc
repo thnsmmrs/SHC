@@ -374,6 +374,78 @@ fun readChar() : void {
 }
 
 /**
+ * Skip single-line comment (// to end of line).
+ */
+fun skipLineComment() : void {
+    c : char;
+
+    advance(2);
+    c = peekChar();
+
+    while (c != '\n' && c != '\0') {
+        advance(1);
+        c = peekChar();
+    }
+}
+
+/**
+ * Skip block comment.
+ */
+fun skipBlockComment() : void {
+    c : char;
+
+    advance(2);
+    c = peekChar();
+
+    while (!atEnd()) {
+        if (c == '*' && peekAhead(1) == '/') {
+            advance(2);
+            return;
+        }
+
+        if (c == '\n') {
+            line_number = line_number + 1;
+            char_position = 0;
+        }
+
+        advance(1);
+        c = peekChar();
+    }
+
+    current_token = TOKEN_ERROR();
+}
+
+/**
+ * Skip whitespace and comments.
+ */
+fun skipWhitespaceAndComments() : void {
+    c : char;
+    progressed : int;
+
+    progressed = 1;
+
+    while (progressed) {
+        progressed = 0;
+
+        skipWhitespace();
+        c = peekChar();
+
+        if (c == '/' && peekAhead(1) == '/') {
+            skipLineComment();
+            progressed = 1;
+        }
+
+        if (c == '/' && peekAhead(1) == '*') {
+            skipBlockComment();
+            if (current_token == TOKEN_ERROR()) {
+                return;
+            }
+            progressed = 1;
+        }
+    }
+}
+
+/**
  * Try to read operator or punctuation symbol.
  * Uses maximal munch for multi-character operators.
  */
@@ -441,4 +513,81 @@ fun readSymbol() : int {
     if (c1 == ':') { advance(1); current_token = TOKEN_COLON(); return 1; }
 
     return 0;
+}
+
+/**
+ * Advance to next token in the input stream.
+ */
+fun nextToken() : void {
+    c : char;
+
+    skipWhitespaceAndComments();
+
+    if (atEnd()) {
+        current_token = TOKEN_EOS();
+        return;
+    }
+
+    c = peekChar();
+
+    if (readSymbol()) {
+        return;
+    }
+
+    if (c == '"') {
+        readString();
+        return;
+    }
+
+    if (c == '\'') {
+        readChar();
+        return;
+    }
+
+    if (isDigit(c)) {
+        readNumber();
+        return;
+    }
+
+    if (isIdentStart(c)) {
+        readIdentifier();
+        return;
+    }
+
+    current_token = TOKEN_ERROR();
+}
+
+/**
+ * Get current token type.
+ */
+fun getCurrentToken() : int {
+    return current_token;
+}
+
+/**
+ * Get token string value for ID or STRING_LITERAL.
+ */
+fun getTokenValue() : ^char {
+    return token_value;
+}
+
+/**
+ * Get token integer value for INT_LITERAL or CHAR_LITERAL.
+ */
+fun getTokenInt() : int {
+    return token_int_value;
+}
+
+/**
+ * Get current line number.
+ */
+fun getLineNumber() : int {
+    return line_number;
+}
+
+/**
+ * Get current character position.
+ */
+fun getCharPosition() : int {
+    return char_position;
 }
