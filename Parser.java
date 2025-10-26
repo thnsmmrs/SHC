@@ -37,6 +37,11 @@ public final class Parser {
     expect(SHC.LPAREN, "(");
     Variable[] params = parseParamList(); // name : type
     expect(SHC.RPAREN, ")");
+
+    // Add parameters to local variables so they can be referenced in function body
+    for (Variable param : params) {
+      localVariables.add(param);
+    }
     expect(SHC.COLON, ":");
 
     // return-type := type-spec | void
