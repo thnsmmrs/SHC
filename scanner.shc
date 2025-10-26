@@ -113,3 +113,65 @@ fun advance(n : int) : void {
 fun atEnd() : int {
     return peekChar() == '\0';
 }
+
+/**
+ * Check if character is a digit (0-9).
+ *
+ * @param c - character to check
+ */
+fun isDigit(c : char) : int {
+    return (c >= '0' && c <= '9');
+}
+
+/**
+ * Check if character is a letter (a-z, A-Z).
+ *
+ * @param c - character to check
+ */
+fun isLetter(c : char) : int {
+    return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
+}
+
+/**
+ * Check if character is whitespace (space, tab, newline, carriage return).
+ *
+ * @param c - character to check
+ */
+fun isWhitespace(c : char) : int {
+    return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
+}
+
+/**
+ * Check if character can start an identifier.
+ *
+ * @param c - character to check
+ */
+fun isIdentStart(c : char) : int {
+    return (isLetter(c) || c == '_');
+}
+
+/**
+ * Check if character can be part of an identifier.
+ *
+ * @param c - character to check
+ */
+fun isIdentPart(c : char) : int {
+    return (isLetter(c) || isDigit(c) || c == '_');
+}
+
+/**
+ * Skip whitespace characters.
+ */
+fun skipWhitespace() : void {
+    c : char;
+    c = peekChar();
+
+    while (!atEnd() && isWhitespace(c)) {
+        if (c == '\n') {
+            line_number = line_number + 1;
+            char_position = 0;
+        }
+        advance(1);
+        c = peekChar();
+    }
+}
