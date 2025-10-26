@@ -82,9 +82,76 @@ public class Compiler {
       output("\n");
     }
 
+    // Output forward declarations for all functions
+    for (Function function : program) {
+      compileFunctionDeclaration(function);
+    }
+    output("\n");
+
+    // Output function definitions
     for (Function function : program) {
       compileFunction(function);
     }
+  }
+
+  /**
+   * Compile a function declaration (forward declaration).
+   *
+   * @param function - function to declare
+   */
+  public static void compileFunctionDeclaration(Function function) {
+    // Special case: main() should return int for C standards compliance
+    if (function.getName().equals("main") && function.getReturnType() == SHC.INT) {
+      output("int ");
+    } else {
+      switch (function.getReturnType()) {
+        case VOID:
+          output("void ");
+          break;
+        case CHAR:
+          output("uint8_t ");
+          break;
+        case INT:
+          output("uint64_t ");
+          break;
+        default:
+          reporter.printError("bad function return type");
+          System.exit(1);
+      }
+    }
+
+    for (int i = 0; i < function.getNReturnReferences(); i++) {
+      output("*");
+    }
+    output(function.getName());
+    output("(");
+    Variable[] arguments = function.getArguments();
+
+    // Special case: main(argc, argv) should use standard C types
+    boolean isMain = function.getName().equals("main");
+    if (isMain && arguments.length >= 1) {
+      // First parameter (argc) should be int
+      output("int " + arguments[0].getName());
+      if (arguments.length >= 2) {
+        // Second parameter (argv) should be char**
+        output(", char **" + arguments[1].getName());
+      }
+      // Any additional parameters use normal types
+      for (int i = 2; i < arguments.length; i++) {
+        output(", ");
+        compileVariable(arguments[i]);
+      }
+    } else {
+      // Normal function parameters
+      for (int i = 0; i < arguments.length; i++) {
+        compileVariable(arguments[i]);
+        if (i < arguments.length - 1) {
+          output(", ");
+        }
+      }
+    }
+    output(");");
+    output("\n");
   }
 
   /**
@@ -119,10 +186,28 @@ public class Compiler {
     output(function.getName());
     output("(");
     Variable[] arguments = function.getArguments();
-    for (int i = 0; i < arguments.length; i++) {
-      compileVariable(arguments[i]);
-      if (i < arguments.length - 1) {
+
+    // Special case: main(argc, argv) should use standard C types
+    boolean isMain = function.getName().equals("main");
+    if (isMain && arguments.length >= 1) {
+      // First parameter (argc) should be int
+      output("int " + arguments[0].getName());
+      if (arguments.length >= 2) {
+        // Second parameter (argv) should be char**
+        output(", char **" + arguments[1].getName());
+      }
+      // Any additional parameters use normal types
+      for (int i = 2; i < arguments.length; i++) {
         output(", ");
+        compileVariable(arguments[i]);
+      }
+    } else {
+      // Normal function parameters
+      for (int i = 0; i < arguments.length; i++) {
+        compileVariable(arguments[i]);
+        if (i < arguments.length - 1) {
+          output(", ");
+        }
       }
     }
     output(")");
@@ -291,19 +376,22 @@ public class Compiler {
   public static void compileAssignment(Assignment assignment) {
     if (assignment.hasAssignee()) {
       var assignee = assignment.getAssignee();
-      // Only dereference if assignee is actually being dereferenced (has ^)
-      // Don't dereference for simple pointer assignment
+      // Same logic as Factor.Var: number of stars = assigneeRefs
+      // Examples:
+      // - `temp = value` where `temp : ^char` → C: `temp = value` (0 stars)
+      // - `^temp = value` where `temp : ^char` → C: `*temp = value` (1 star)
       int varRefs = assignee.getVariable().getNReferences();
       int assigneeRefs = assignee.getNReferences();
 
-      if (assigneeRefs > 0) {
-        // This is dereferencing (^temp = ...), add appropriate stars
-        int stars = varRefs - assigneeRefs;
-        for (int i = 0; i < stars; i++) {
+      if (varRefs == 0 && assigneeRefs == 1) {
+        // Special case: taking address in assignment (very rare)
+        output("&");
+      } else {
+        // General case: output assigneeRefs stars for dereferencing
+        for (int i = 0; i < assigneeRefs; i++) {
           output("*");
         }
       }
-      // else: plain assignment (temp = ...), no stars needed
 
       output(assignee.getVariable().getName());
       output(" = ");
@@ -434,15 +522,28 @@ public class Compiler {
   public static void compileFactor(Factor factor) {
     switch (factor) {
       case Factor.Var varFactor:
-        // In SHC: variable `x : ^char` is a pointer
-        // Using `x` gives pointer value → C: `x` (0 stars)
-        // Using `^x` dereferences → C: `*x` (1 star)
-        // The number of stars in C = number of ^ in SHC usage
+        // In SHC: `^` is used for both address-of and dereference
+        // The semantics depend on the variable's declared type:
+        // - varRefs = number of `^` in variable declaration (e.g., `x : ^^int` has varRefs=2)
+        // - usageRefs = number of `^` in usage (e.g., `^^x` has usageRefs=2)
+        //
+        // Examples:
+        // - `x : int`, use `^x` → taking address → C: `&x`
+        // - `ptr : ^int`, use `^ptr` → dereferencing → C: `*ptr`
+        // - `ptr : ^int`, use `ptr` → plain usage → C: `ptr`
+        int varRefs = varFactor.getVariable().getNReferences();
         int usageRefs = varFactor.getNReferences();
 
-        for (int i = 0; i < usageRefs; i++) {
-          output("*");
+        if (varRefs == 0 && usageRefs == 1) {
+          // Special case: taking address of a non-pointer variable
+          output("&");
+        } else {
+          // General case: output usageRefs stars for dereferencing
+          for (int i = 0; i < usageRefs; i++) {
+            output("*");
+          }
         }
+
         output(varFactor.getVariable().getName());
         break;
       case Factor.Const constFactor:
