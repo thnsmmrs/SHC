@@ -2,7 +2,8 @@
  * Parser for SHC language - builds AST from tokens.
  * Part of the self-hosted SHC compiler (Compiler 2).
  *
- * @author SHC Compiler Team
+ * @author SWY
+ * @version 1.0
  */
 
 /* ============================================================================
