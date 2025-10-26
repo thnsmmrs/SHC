@@ -1,0 +1,782 @@
+fun TK_FUN() : int { return 1; }
+fun TK_IF() : int { return 2; }
+fun TK_ELSE() : int { return 3; }
+fun TK_WHILE() : int { return 4; }
+fun TK_RETURN() : int { return 5; }
+fun TK_BREAK() : int { return 6; }
+fun TK_CONTINUE() : int { return 7; }
+fun TK_VOID() : int { return 8; }
+fun TK_INT() : int { return 9; }
+fun TK_CHAR() : int { return 10; }
+fun TK_AND() : int { return 11; }
+fun TK_OR() : int { return 12; }
+fun TK_NOT() : int { return 13; }
+fun TK_ADD() : int { return 14; }
+fun TK_SUB() : int { return 15; }
+fun TK_MUL() : int { return 16; }
+fun TK_DIV() : int { return 17; }
+fun TK_MOD() : int { return 18; }
+fun TK_ASSIGN() : int { return 19; }
+fun TK_EQUAL() : int { return 20; }
+fun TK_NEQ() : int { return 21; }
+fun TK_LESS() : int { return 22; }
+fun TK_GREATER() : int { return 23; }
+fun TK_LEQ() : int { return 24; }
+fun TK_GEQ() : int { return 25; }
+fun TK_CARET() : int { return 26; }
+fun TK_COLON() : int { return 27; }
+fun TK_SEMI() : int { return 28; }
+fun TK_COMMA() : int { return 29; }
+fun TK_LPAREN() : int { return 30; }
+fun TK_RPAREN() : int { return 31; }
+fun TK_LSQUARE() : int { return 32; }
+fun TK_RSQUARE() : int { return 33; }
+fun TK_LCURL() : int { return 34; }
+fun TK_RCURL() : int { return 35; }
+fun TK_ID() : int { return 36; }
+fun TK_STRLIT() : int { return 37; }
+fun TK_INTLIT() : int { return 38; }
+fun TK_CHARLIT() : int { return 39; }
+fun TK_TRUE() : int { return 40; }
+fun TK_FALSE() : int { return 41; }
+fun TK_EOS() : int { return 42; }
+fun TK_ERROR() : int { return 43; }
+
+//Skipping the whole Global shit
+
+fun make_1char_str(c1: char): ^char { a: ^char; b: ^char; ^a = malloc(2); ^b = ^a; b = c1; ^b = ^b + 1; b = 0; return ^a; }
+fun make_2char_str(c1: char, c2: char): ^char { a: ^char; b: ^char; ^a = malloc(3); ^b = ^a; b = c1; ^b = ^b + 1; b = c2; ^b = ^b + 1; b = 0; return ^a; }
+fun make_3char_str(c1: char, c2: char, c3: char): ^char { a: ^char; b: ^char; ^a = malloc(4); ^b = ^a; b = c1; ^b = ^b + 1; b = c2; ^b = ^b + 1; b = c3; ^b = ^b + 1; b = 0; return ^a; }
+fun make_4char_str(c1: char, c2: char, c3: char, c4: char): ^char { a: ^char; b: ^char; ^a = malloc(5); ^b = ^a; b = c1; ^b = ^b + 1; b = c2; ^b = ^b + 1; b = c3; ^b = ^b + 1; b = c4; ^b = ^b + 1; b = 0; return ^a; }
+fun make_5char_str(c1: char, c2: char, c3: char, c4: char, c5: char): ^char { a: ^char; b: ^char; ^a = malloc(6); ^b = ^a; b = c1; ^b = ^b + 1; b = c2; ^b = ^b + 1; b = c3; ^b = ^b + 1; b = c4; ^b = ^b + 1; b = c5; ^b = ^b + 1; b = 0; return ^a; }
+fun make_6char_str(c1: char, c2: char, c3: char, c4: char, c5: char, c6: char): ^char { a: ^char; b: ^char; ^a = malloc(7); ^b = ^a; b = c1; ^b = ^b + 1; b = c2; ^b = ^b + 1; b = c3; ^b = ^b + 1; b = c4; ^b = ^b + 1; b = c5; ^b = ^b + 1; b = c6; ^b = ^b + 1; b = 0; return ^a; }
+fun make_7char_str(c1: char, c2: char, c3: char, c4: char, c5: char, c6: char, c7: char): ^char { a: ^char; b: ^char; ^a = malloc(8); ^b = ^a; b = c1; ^b = ^b + 1; b = c2; ^b = ^b + 1; b = c3; ^b = ^b + 1; b = c4; ^b = ^b + 1; b = c5; ^b = ^b + 1; b = c6; ^b = ^b + 1; b = c7; ^b = ^b + 1; b = 0; return ^a; }
+fun make_8char_str(c1: char, c2: char, c3: char, c4: char, c5: char, c6: char, c7: char, c8: char): ^char { a: ^char; b: ^char; ^a = malloc(9); ^b = ^a; b = c1; ^b = ^b + 1; b = c2; ^b = ^b + 1; b = c3; ^b = ^b + 1; b = c4; ^b = ^b + 1; b = c5; ^b = ^b + 1; b = c6; ^b = ^b + 1; b = c7; ^b = ^b + 1; b = c8; ^b = ^b + 1; b = 0; return ^a; }
+fun make_9char_str(c1: char, c2: char, c3: char, c4: char, c5: char, c6: char, c7: char, c8: char, c9: char): ^char { a: ^char; b: ^char; ^a = malloc(10); ^b = ^a; b = c1; ^b = ^b + 1; b = c2; ^b = ^b + 1; b = c3; ^b = ^b + 1; b = c4; ^b = ^b + 1; b = c5; ^b = ^b + 1; b = c6; ^b = ^b + 1; b = c7; ^b = ^b + 1; b = c8; ^b = ^b + 1; b = c9; ^b = ^b + 1; b = 0; return ^a; }
+fun make_10char_str(c1: char, c2: char, c3: char, c4: char, c5: char, c6: char, c7: char, c8: char, c9: char, c10: char): ^char { a: ^char; b: ^char; ^a = malloc(11); ^b = ^a; b = c1; ^b = ^b + 1; b = c2; ^b = ^b + 1; b = c3; ^b = ^b + 1; b = c4; ^b = ^b + 1; b = c5; ^b = ^b + 1; b = c6; ^b = ^b + 1; b = c7; ^b = ^b + 1; b = c8; ^b = ^b + 1; b = c9; ^b = ^b + 1; b = c10; ^b = ^b + 1; b = 0; return ^a; }
+
+//continuing on with this hell
+
+fun lit_fun() : ^char { return make_3char_str('f','u','n'); }
+fun lit_if() : ^char { return make_2char_str('i','f'); }
+fun lit_else() : ^char { return make_4char_str('e','l','s','e'); }
+fun lit_while() : ^char { return make_5char_str('w','h','i','l','e'); }
+fun lit_return() : ^char { return make_6char_str('r','e','t','u','r','n'); }
+fun lit_break() : ^char { return make_5char_str('b','r','e','a','k'); }
+fun lit_continue() : ^char { return make_8char_str('c','o','n','t','i','n','u','e'); }
+fun lit_void() : ^char { return make_4char_str('v','o','i','d'); }
+fun lit_int() : ^char { return make_3char_str('i','n','t'); }
+fun lit_char() : ^char { return make_4char_str('c','h','a','r'); }
+fun lit_true() : ^char { return make_4char_str('t','r','u','e'); }
+fun lit_false() : ^char { return make_5char_str('f','a','l','s','e'); }
+
+fun lit_eqeq() : ^char { return make_2char_str('=','='); }
+fun lit_neq() : ^char { return make_2char_str('!','='); }
+fun lit_leq() : ^char { return make_2char_str('<','='); }
+fun lit_geq() : ^char { return make_2char_str('>','='); }
+fun lit_andand() : ^char { return make_2char_str('&','&'); }
+fun lit_oror() : ^char { return make_2char_str('|','|'); }
+
+fun lit_plus() : ^char { return make_1char_str('+'); }
+fun lit_minus() : ^char { return make_1char_str('-'); }
+fun lit_star() : ^char { return make_1char_str('*'); }
+fun lit_slash() : ^char { return make_1char_str('/'); }
+fun lit_mod() : ^char { return make_1char_str('%'); }
+fun lit_assign() : ^char { return make_1char_str('='); }
+fun lit_lt() : ^char { return make_1char_str('<'); }
+fun lit_gt() : ^char { return make_1char_str('>'); }
+fun lit_bang() : ^char { return make_1char_str('!'); }
+fun lit_amp() : ^char { return make_1char_str('&'); }
+fun lit_caret() : ^char { return make_1char_str('^'); }
+fun lit_lp() : ^char { return make_1char_str('('); }
+fun lit_rp() : ^char { return make_1char_str(')'); }
+fun lit_ls() : ^char { return make_1char_str('['); }
+fun lit_rs() : ^char { return make_1char_str(']'); }
+fun lit_lc() : ^char { return make_1char_str('{'); }
+fun lit_rc() : ^char { return make_1char_str('}'); }
+fun lit_comma() : ^char { return make_1char_str(','); }
+fun lit_semi() : ^char { return make_1char_str(';'); }
+fun lit_colon() : ^char { return make_1char_str(':'); }
+
+//strlen
+fun strlen(str: ^char): int {
+  if (str == 0) {
+    return 0;
+  } else {
+    return 1 + strlen(^str + 1);
+  }
+}
+
+//startsWithAtLine
+fun startsWithAtLine(line : ^char, off : int, needle : ^char) : int {
+    i : int;
+    i = 0;
+    n : int;
+    n = strlen(needle);
+    while (i < n){
+        if (line + off + i == 0){
+            return 0;
+        }
+        if (line + off != needle){
+            return 0;
+        }
+        i = i + 1;
+    }
+    return 1;
+}
+
+//copy substring line
+fun slice_copy(dst : ^char, dstCap : int, src : ^char, start : int, end : int) : void {
+    i : int;
+    i = 0;
+    n : int;
+    n = end - start;
+    if (n >= dstCap){
+        n = dstCap - 1;
+    }
+    while (i < n) {
+        temp1 : ^char;
+        ^temp1 = ^dst + i;
+        temp1 = src + start + i;
+        i = i + 1;
+    }
+    temp2 : ^char;
+    ^temp2 = ^dst + n;
+    temp2 = 0;
+}
+
+//chomp
+fun chomp(s : ^char) : void {
+    n : int;
+    n = c_len(s);
+    while (n > 0) {
+        p : ^char;
+        ^p = ^s + (n - 1);
+        if (p == '\n') {
+            p = 0;
+            n = n - 1;
+        } else {
+            ^p = ^s + (n - 1);
+            if (p == '\r') {
+                p = 0;
+                n = n - 1;
+            } else {
+                break;
+            }
+        }
+    }
+}
+
+//init tables
+
+fun init_keywords() : void {
+    G_kwN = 12;
+
+    G_kw = malloc(G_kwN * 8);
+    G_kwTok = malloc(G_kwN * 8);
+
+    s_kw : ^^char; s_tok : ^int;
+
+    ^s_kw = ^G_kw + 0;   s_kw = lit_fun();      ^s_tok = ^G_kwTok + 0;   s_tok = TK_FUN();
+    ^s_kw = ^G_kw + 8;   s_kw = lit_if();       ^s_tok = ^G_kwTok + 8;   s_tok = TK_IF();
+    ^s_kw = ^G_kw + 16;  s_kw = lit_else();     ^s_tok = ^G_kwTok + 16;  s_tok = TK_ELSE();
+    ^s_kw = ^G_kw + 24;  s_kw = lit_while();    ^s_tok = ^G_kwTok + 24;  s_tok = TK_WHILE();
+    ^s_kw = ^G_kw + 32;  s_kw = lit_return();   ^s_tok = ^G_kwTok + 32;  s_tok = TK_RETURN();
+    ^s_kw = ^G_kw + 40;  s_kw = lit_break();    ^s_tok = ^G_kwTok + 40;  s_tok = TK_BREAK();
+    ^s_kw = ^G_kw + 48;  s_kw = lit_continue(); ^s_tok = ^G_kwTok + 48;  s_tok = TK_CONTINUE();
+    ^s_kw = ^G_kw + 56;  s_kw = lit_void();     ^s_tok = ^G_kwTok + 56;  s_tok = TK_VOID();
+    ^s_kw = ^G_kw + 64;  s_kw = lit_int();      ^s_tok = ^G_kwTok + 64;  s_tok = TK_INT();
+    ^s_kw = ^G_kw + 72;  s_kw = lit_char();     ^s_tok = ^G_kwTok + 72;  s_tok = TK_CHAR();
+    ^s_kw = ^G_kw + 80;  s_kw = lit_true();     ^s_tok = ^G_kwTok + 80;  s_tok = TK_TRUE();
+    ^s_kw = ^G_kw + 88;  s_kw = lit_false();    ^s_tok = ^G_kwTok + 88;  s_tok = TK_FALSE();
+}
+
+fun init_symbols() : void {
+    G_symN = 26;
+
+    G_sym = malloc(G_symN * 8);
+    G_symTok = malloc(G_symN * 8);
+
+    s_sym : ^^char; s_tok : ^int;
+
+    ^s_sym = ^G_sym + 0;    s_sym = lit_eqeq();   ^s_tok = ^G_symTok + 0;    s_tok = TK_EQUAL();
+    ^s_sym = ^G_sym + 8;    s_sym = lit_neq();    ^s_tok = ^G_symTok + 8;    s_tok = TK_NEQ();
+    ^s_sym = ^G_sym + 16;   s_sym = lit_leq();    ^s_tok = ^G_symTok + 16;   s_tok = TK_LEQ();
+    ^s_sym = ^G_sym + 24;   s_sym = lit_geq();    ^s_tok = ^G_symTok + 24;   s_tok = TK_GEQ();
+    ^s_sym = ^G_sym + 32;   s_sym = lit_andand(); ^s_tok = ^G_symTok + 32;   s_tok = TK_AND();
+    ^s_sym = ^G_sym + 40;   s_sym = lit_oror();   ^s_tok = ^G_symTok + 40;   s_tok = TK_OR();
+    ^s_sym = ^G_sym + 48;   s_sym = lit_plus();   ^s_tok = ^G_symTok + 48;   s_tok = TK_ADD();
+    ^s_sym = ^G_sym + 56;   s_sym = lit_minus();  ^s_tok = ^G_symTok + 56;   s_tok = TK_SUB();
+    ^s_sym = ^G_sym + 64;   s_sym = lit_star();   ^s_tok = ^G_symTok + 64;   s_tok = TK_MUL();
+    ^s_sym = ^G_sym + 72;   s_sym = lit_slash();  ^s_tok = ^G_symTok + 72;   s_tok = TK_DIV();
+    ^s_sym = ^G_sym + 80;   s_sym = lit_mod();    ^s_tok = ^G_symTok + 80;   s_tok = TK_MOD();
+    ^s_sym = ^G_sym + 88;   s_sym = lit_assign(); ^s_tok = ^G_symTok + 88;   s_tok = TK_ASSIGN();
+    ^s_sym = ^G_sym + 96;   s_sym = lit_lt();     ^s_tok = ^G_symTok + 96;   s_tok = TK_LESS();
+    ^s_sym = ^G_sym + 104;  s_sym = lit_gt();     ^s_tok = ^G_symTok + 104;  s_tok = TK_GREATER();
+    ^s_sym = ^G_sym + 112;  s_sym = lit_bang();   ^s_tok = ^G_symTok + 112;  s_tok = TK_NOT();
+    ^s_sym = ^G_sym + 120;  s_sym = lit_amp();    ^s_tok = ^G_symTok + 120;  s_tok = TK_CARET();   /* legacy quirk */
+    ^s_sym = ^G_sym + 128;  s_sym = lit_caret();  ^s_tok = ^G_symTok + 128;  s_tok = TK_CARET();
+    ^s_sym = ^G_sym + 136;  s_sym = lit_lp();     ^s_tok = ^G_symTok + 136;  s_tok = TK_LPAREN();
+    ^s_sym = ^G_sym + 144;  s_sym = lit_rp();     ^s_tok = ^G_symTok + 144;  s_tok = TK_RPAREN();
+    ^s_sym = ^G_sym + 152;  s_sym = lit_ls();     ^s_tok = ^G_symTok + 152;  s_tok = TK_LSQUARE();
+    ^s_sym = ^G_sym + 160;  s_sym = lit_rs();     ^s_tok = ^G_symTok + 160;  s_tok = TK_RSQUARE();
+    ^s_sym = ^G_sym + 168;  s_sym = lit_lc();     ^s_tok = ^G_symTok + 168;  s_tok = TK_LCURL();
+    ^s_sym = ^G_sym + 176;  s_sym = lit_rc();     ^s_tok = ^G_symTok + 176;  s_tok = TK_RCURL();
+    ^s_sym = ^G_sym + 184;  s_sym = lit_comma();  ^s_tok = ^G_symTok + 184;  s_tok = TK_COMMA();
+    ^s_sym = ^G_sym + 192;  s_sym = lit_semi();   ^s_tok = ^G_symTok + 192;  s_tok = TK_SEMI();
+    ^s_sym = ^G_sym + 200;  s_sym = lit_colon();  ^s_tok = ^G_symTok + 200;  s_tok = TK_COLON();
+}
+
+//file handling
+
+
+fun atEOL() : int {
+    n : int;
+    n = c_len(G_line);
+    if (G_charsScanned >= n) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+
+fun curc() : char {
+    if (atEOL() != 0) {
+        return 0;
+    } else {
+        p : ^char;
+        ^p = ^G_line + G_charsScanned;
+        return p;   // deref’d read
+    }
+}
+
+
+fun peekc(ahead : int) : char {
+    i : int; n : int;
+    i = G_charsScanned + ahead;
+    n = c_len(G_line);
+    if (i < n) {
+        p : ^char;
+        ^p = ^G_line + i;
+        return p;
+    } else {
+        return 0;
+    }
+}
+
+
+fun nextLine() : void {
+    t0 : ^char;
+    ^t0 = ^G_line + 0;
+    t0 = 0;
+
+    if (G_in == 0) {
+        return;
+    } else {
+        // while (1)
+        while (1 == 1) {
+            r : ^char;
+            ^r = fgets(G_line, CAP_LINE, G_in);
+            if (r == 0) {
+                fclose(G_in);
+                G_in = 0;
+
+                t1 : ^char;
+                ^t1 = ^G_line + 0;
+                t1 = 0;
+
+                G_charsScanned = 0;
+                break;
+            } else {
+                chomp(G_line);
+                G_linesScanned = G_linesScanned + 1;
+                G_charsScanned = 0;
+
+                c0 : ^char;
+                ^c0 = ^G_line + 0;
+                if (c0 != 0) {
+                    break;
+                } else {
+                    // keep looping
+                }
+            }
+        }
+    }
+}
+
+// void advanceN(int n) { G_charsScanned = G_charsScanned + n; }
+fun advanceN(n : int) : void {
+    G_charsScanned = G_charsScanned + n;
+}
+
+// void skipWhitespaceAndComments() { ... }
+fun skipWhitespaceAndComments() : void {
+    progressed : int;
+    progressed = 0;
+
+    // do { ... } while (progressed != 0 && G_in != 0)
+    while (1 == 1) {
+        progressed = 0;
+
+        // whitespace: while (atEOL() == 0) { if (isspace(curc())) { advanceN(1); progressed = 1; } else break; }
+        while (atEOL() == 0) {
+            c : char;
+            c = curc();
+            if (isspace(c) != 0) {
+                advanceN(1);
+                progressed = 1;
+            } else {
+                break;
+            }
+        }
+
+        // line comment: // ...
+        if (atEOL() == 0) {
+            cc : char; np1 : char;
+            cc = curc();
+            np1 = peekc(1);
+            if (cc == '/' && np1 == '/') {
+                G_charsScanned = c_len(G_line);
+                progressed = 1;
+            }
+        }
+
+        // block comment: /* ... */
+        if (atEOL() == 0) {
+            cc2 : char; np2 : char;
+            cc2 = curc();
+            np2 = peekc(1);
+            if (cc2 == '/' && np2 == '*') {
+                advanceN(2);
+
+                closed : int;
+                closed = 0;
+
+                // while (1)
+                while (1 == 1) {
+                    // inner: while (atEOL() == 0) { if (curc()=='*' && peekc(1)=='/') { advanceN(2); closed=1; break; } else advanceN(1); }
+                    while (atEOL() == 0) {
+                        a : char; b : char;
+                        a = curc();
+                        b = peekc(1);
+                        if (a == '*' && b == '/') {
+                            advanceN(2);
+                            closed = 1;
+                            break;
+                        } else {
+                            advanceN(1);
+                        }
+                    }
+
+                    if (closed != 0) {
+                        break;
+                    } else {
+                        // if (G_line[0] == 0 && atEOL() != 0) { G_tok = TK_ERROR(); return; }
+                        p0 : ^char;
+                        ^p0 = ^G_line + 0;
+                        if (p0 == 0 && atEOL() != 0) {
+                            G_tok = TK_ERROR();
+                            return;
+                        }
+
+                        nextLine();
+                        if (G_in == 0) {
+                            break;
+                        }
+                    }
+                }
+
+                progressed = 1;
+            }
+        }
+
+        // if (atEOL() != 0 && G_in != 0) { nextLine(); progressed = 1; }
+        if (atEOL() != 0) {
+            if (G_in != 0) {
+                nextLine();
+                progressed = 1;
+            }
+        }
+
+        // while condition of the original do/while
+        if (progressed != 0 && G_in != 0) {
+            // keep looping
+        } else {
+            break;
+        }
+    }
+}
+
+//tokenizer
+
+fun nextString() : void {
+    out : int; out = 0;
+    advanceN(1);  // skip opening quote
+
+    while (1 == 1) {
+        if (atEOL() != 0) { G_tok = TK_ERROR(); return; }
+
+        c : char; c = curc();
+        if (c == '"') {
+            advanceN(1);
+            pz : ^char; ^pz = ^G_str + out; pz = 0;
+            G_tok = TK_STRLIT();
+            return;
+        } else {
+            if (c == '\\') {
+                tmpLen : int; tmpLen = c_len(G_line);
+                if ((G_charsScanned + 1) >= tmpLen) { G_tok = TK_ERROR(); return; }
+                else {
+                    e : char; e = peekc(1);
+
+                    if (e == 'n') {
+                        if (out + 1 >= CAP_STR) { G_tok = TK_ERROR(); return; }
+                        pn : ^char; ^pn = ^G_str + out; pn = '\n';
+                        out = out + 1;
+                        advanceN(2);
+                    } else {
+                        if (e == 't') {
+                            if (out + 1 >= CAP_STR) { G_tok = TK_ERROR(); return; }
+                            pt : ^char; ^pt = ^G_str + out; pt = '\t';
+                            out = out + 1;
+                            advanceN(2);
+                        } else {
+                            if (e == 'r') {
+                                if (out + 1 >= CAP_STR) { G_tok = TK_ERROR(); return; }
+                                pr : ^char; ^pr = ^G_str + out; pr = '\r';
+                                out = out + 1;
+                                advanceN(2);
+                            } else {
+                                if (e == '\\') {
+                                    if (out + 1 >= CAP_STR) { G_tok = TK_ERROR(); return; }
+                                    pb : ^char; ^pb = ^G_str + out; pb = '\\';
+                                    out = out + 1;
+                                    advanceN(2);
+                                } else {
+                                    if (e == '\'') {
+                                        if (out + 1 >= CAP_STR) { G_tok = TK_ERROR(); return; }
+                                        psq : ^char; ^psq = ^G_str + out; psq = '\'';
+                                        out = out + 1;
+                                        advanceN(2);
+                                    } else {
+                                        if (e == '"') {
+                                            if (out + 1 >= CAP_STR) { G_tok = TK_ERROR(); return; }
+                                            pdq : ^char; ^pdq = ^G_str + out; pdq = '"';
+                                            out = out + 1;
+                                            advanceN(2);
+                                        } else {
+                                            if (e == '0') {
+                                                if (out + 1 >= CAP_STR) { G_tok = TK_ERROR(); return; }
+                                                pz2 : ^char; ^pz2 = ^G_str + out; pz2 = 0;
+                                                out = out + 1;
+                                                advanceN(2);
+                                            } else {
+                                                G_tok = TK_ERROR(); return;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (out + 1 >= CAP_STR) { G_tok = TK_ERROR(); return; }
+                pw : ^char; ^pw = ^G_str + out; pw = c;
+                out = out + 1;
+                advanceN(1);
+            }
+        }
+    }
+}
+
+fun nextCharLiteral() : void {
+    v : int;
+    advanceN(1);  // skip opening '
+    if (atEOL() != 0) { G_tok = TK_ERROR(); return; }
+
+    if (curc() == '\\') {
+        ln : int; ln = c_len(G_line);
+        if ((G_charsScanned + 1) >= ln) { G_tok = TK_ERROR(); return; }
+        else {
+            e : char; e = peekc(1);
+            if (e == 'n') v = '\n';
+            else {
+                if (e == 't') v = '\t';
+                else {
+                    if (e == 'r') v = '\r';
+                    else {
+                        if (e == '\\') v = '\\';
+                        else {
+                            if (e == '\'') v = '\'';
+                            else {
+                                if (e == '"') v = '"';
+                                else {
+                                    if (e == '0') v = 0;
+                                    else { G_tok = TK_ERROR(); return; }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            advanceN(2);
+        }
+    } else {
+        c : char; c = curc();
+        v = c;
+        advanceN(1);
+    }
+
+    if (atEOL() != 0) { G_tok = TK_ERROR(); return; }
+    if (curc() != '\'') { G_tok = TK_ERROR(); return; }
+    advanceN(1);
+
+    G_latestChar = v;
+    G_tok = TK_CHARLIT();
+}
+
+fun nextIntLiteral() : void {
+    start : int; start = G_charsScanned;
+
+    if (curc() == '0') {
+        advanceN(1);
+        if (atEOL() == 0) {
+            d : char; d = curc();
+            if (isdigit(d) != 0) { G_tok = TK_ERROR(); return; }
+        }
+        G_latestInt = 0;
+        G_tok = TK_INTLIT();
+        return;
+    }
+
+    c0 : char; c0 = curc();
+    if (c0 < '1' || c0 > '9') { G_tok = TK_ERROR(); return; }
+
+    advanceN(1);
+    while (atEOL() == 0) {
+        d2 : char; d2 = curc();
+        if (isdigit(d2) != 0) { advanceN(1); }
+        else { break; }
+    }
+
+    end : int; end = G_charsScanned;
+    len : int; len = end - start;
+    i : int; i = 0;
+    v : int; v = 0;
+    if (len <= 0) { G_tok = TK_ERROR(); return; }
+
+    while (i < len) {
+        p : ^char; ^p = ^G_line + start + i;
+        ch : char; ch = p;
+        v = v * 10 + (ch - '0');
+        i = i + 1;
+    }
+
+    G_latestInt = v;
+    G_tok = TK_INTLIT();
+}
+
+fun isIdentStart(c : char) : int {
+    if (c == '_') { return 1; }
+    if (isalpha(c) != 0) { return 1; }
+    return 0;
+}
+
+fun isIdentPart(c : char) : int {
+    if (c == '_') { return 1; }
+    if (isalnum(c) != 0) { return 1; }
+    return 0;
+}
+
+fun nextIdentifierOrKeyword() : void {
+    start : int; start = G_charsScanned;
+    end : int;
+    len : int;
+    i : int;
+
+    if (isIdentStart(curc()) == 0) { G_tok = TK_ERROR(); return; }
+    advanceN(1);
+    while (atEOL() == 0) {
+        if (isIdentPart(curc()) != 0) { advanceN(1); }
+        else { break; }
+    }
+
+    end = G_charsScanned;
+    len = end - start;
+    if (len <= 0) { G_tok = TK_ERROR(); return; }
+    if (len >= CAP_ID) { G_tok = TK_ERROR(); return; }
+
+    slice_copy(G_id, CAP_ID, G_line, start, end);
+
+    i = 0;
+    while (i < G_kwN) {
+        kw : ^char; kw = G_kw[i];
+        k : int; k = 0;
+        ok : int; ok = 1;
+        kwlen : int; kwlen = c_len(kw);
+        idlen : int; idlen = c_len(G_id);
+
+        if (kwlen != idlen) {
+            ok = 0;
+        } else {
+            while (k < kwlen) {
+                pkw : ^char; ^pkw = ^kw + k;
+                pid : ^char; ^pid = ^G_id + k;
+                ckw : char; ckw = pkw;
+                cid : char; cid = pid;
+                if (ckw != cid) { ok = 0; break; }
+                k = k + 1;
+            }
+        }
+
+        if (ok != 0) {
+            G_tok = G_kwTok[i];
+            if (G_tok == TK_TRUE()) { G_latestInt = 1; }
+            else {
+                if (G_tok == TK_FALSE()) { G_latestInt = 0; }
+            }
+            return;
+        }
+
+        i = i + 1;
+    }
+
+    G_tok = TK_ID();
+}
+
+fun tryNextSymbol() : int {
+    bestLen : int; bestLen = 0;
+    found : int; found = TK_ERROR();
+    i : int; i = 0;
+
+    while (i < G_symN) {
+        s : ^char; s = G_sym[i];
+        sl : int; sl = c_len(s);
+
+        if (starts_with_at(G_line, G_charsScanned, s) != 0) {
+            if (sl > bestLen) {
+                bestLen = sl;
+                found = G_symTok[i];
+            }
+        }
+        i = i + 1;
+    }
+
+    if (bestLen != 0) {
+        G_tok = found;
+        advanceN(bestLen);
+        return 1;
+    }
+    return 0;
+}
+
+// public driver
+
+// nextToken in SHC style
+fun nextToken() : void {
+    skipWhitespaceAndComments();
+    G_lineIdx = G_linesScanned;
+    G_charIdx = G_charsScanned;
+    slice_copy(G_tokLine, CAP_LINE, G_line, 0, c_len(G_line));
+
+    // if (G_line[0] == 0 && G_in == 0) { G_tok = TK_EOS(); return; }
+    if (G_line[0] == 0) {
+        if (G_in == 0) { G_tok = TK_EOS(); return; }
+    }
+
+    // if (G_line[0] != 0) { if ((c_len(G_line) - G_charsScanned) == 0) { nextLine(); nextToken(); return; } }
+    if (G_line[0] != 0) {
+        rem : int; rem = c_len(G_line) - G_charsScanned;
+        if (rem == 0) {
+            nextLine();
+            nextToken();
+            return;
+        }
+    }
+
+    if (tryNextSymbol() == 0) {
+        if (atEOL() != 0) { nextLine(); nextToken(); return; }
+
+        c : char; c = curc();
+        if (c == '"') {
+            nextString();
+        } else {
+            if (c == '\'') {
+                nextCharLiteral();
+            } else {
+                if (isdigit(c) != 0) {
+                    nextIntLiteral();
+                } else {
+                    if (isIdentStart(c) != 0) {
+                        nextIdentifierOrKeyword();
+                    } else {
+                        G_tok = TK_ERROR();
+                    }
+                }
+            }
+        }
+    }
+}
+
+//ctor/API
+
+// init
+fun SHCScanner_init(filename : ^char) : void {
+    // capacities
+    CAP_LINE = 8192;
+    CAP_ID   = 256;
+    CAP_STR  = 4096;
+
+    // buffers
+    G_line    = malloc(CAP_LINE);
+    G_tokLine = malloc(CAP_LINE);
+    G_id      = malloc(CAP_ID);
+    G_str     = malloc(CAP_STR);
+
+    // positions
+    G_lineIdx = 0;
+    G_charIdx = 0;
+    G_linesScanned = 0;
+    G_charsScanned = 0;
+
+    // tables
+    init_keywords();
+    init_symbols();
+
+    // open file (mode "r" built on heap)
+    mode : ^char;
+    mode = make_1char_str('r');
+    G_in = fopen(filename, mode);
+
+    if (G_in == 0) {
+        G_tok = TK_ERROR();
+        return;
+    }
+
+    nextLine();
+    nextToken();
+}
+
+// --- Java-style getters (no structs, no drama) ---
+
+fun currentToken() : int { return G_tok; }
+
+fun getId() : ^char { return G_id; }
+
+fun getInt() : int { return G_latestInt; }
+
+fun getCharVal() : int { return G_latestChar; }
+
+fun getStringBuf() : ^char { return G_str; }
+
+fun getCurrentTokenLine() : ^char { return G_tokLine; }
+
+fun getLineIdx() : int { return G_lineIdx; }
+
+fun getCharIdx() : int { return G_charIdx; }
+
+fun getEndingLineIdx() : int { return G_linesScanned; }
+
+fun getEndingCharIdx() : int { return G_charsScanned; }
