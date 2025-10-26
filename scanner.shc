@@ -1,0 +1,593 @@
+/**
+ * Scanner for SHC language.
+ * Tokenizes SHC source code into tokens for parsing.
+ *
+ * @author SWY
+ */
+
+/* Token type constants matching SHC enum */
+fun TOKEN_FUN() : int { return 0; }
+fun TOKEN_IF() : int { return 1; }
+fun TOKEN_ELSE() : int { return 2; }
+fun TOKEN_WHILE() : int { return 3; }
+fun TOKEN_RETURN() : int { return 4; }
+fun TOKEN_BREAK() : int { return 5; }
+fun TOKEN_CONTINUE() : int { return 6; }
+fun TOKEN_VOID() : int { return 7; }
+fun TOKEN_INT() : int { return 8; }
+fun TOKEN_CHAR() : int { return 9; }
+
+fun TOKEN_AND() : int { return 10; }
+fun TOKEN_OR() : int { return 11; }
+fun TOKEN_NOT() : int { return 12; }
+
+fun TOKEN_ADD() : int { return 13; }
+fun TOKEN_SUBTRACT() : int { return 14; }
+fun TOKEN_MULTIPLY() : int { return 15; }
+fun TOKEN_DIVIDE() : int { return 16; }
+fun TOKEN_MOD() : int { return 17; }
+
+fun TOKEN_ASSIGN() : int { return 18; }
+fun TOKEN_EQUAL() : int { return 19; }
+fun TOKEN_NEQ() : int { return 20; }
+fun TOKEN_LESS() : int { return 21; }
+fun TOKEN_GREATER() : int { return 22; }
+fun TOKEN_LEQ() : int { return 23; }
+fun TOKEN_GEQ() : int { return 24; }
+
+fun TOKEN_AMP() : int { return 25; }
+
+fun TOKEN_COLON() : int { return 26; }
+fun TOKEN_SEMICOLON() : int { return 27; }
+fun TOKEN_COMMA() : int { return 28; }
+fun TOKEN_LPAREN() : int { return 29; }
+fun TOKEN_RPAREN() : int { return 30; }
+fun TOKEN_LSQUARE() : int { return 31; }
+fun TOKEN_RSQUARE() : int { return 32; }
+fun TOKEN_LCURL() : int { return 33; }
+fun TOKEN_RCURL() : int { return 34; }
+
+fun TOKEN_ID() : int { return 35; }
+fun TOKEN_STRING_LITERAL() : int { return 36; }
+fun TOKEN_INT_LITERAL() : int { return 37; }
+fun TOKEN_CHAR_LITERAL() : int { return 38; }
+fun TOKEN_BOOL_LITERAL() : int { return 39; }
+fun TOKEN_TRUE() : int { return 40; }
+fun TOKEN_FALSE() : int { return 41; }
+
+fun TOKEN_EOS() : int { return 42; }
+fun TOKEN_ERROR() : int { return 43; }
+
+/* Global scanner state */
+input_buffer : ^char;
+current_pos : int;
+line_number : int;
+char_position : int;
+current_token : int;
+token_value : ^char;
+token_int_value : int;
+
+/**
+ * Initialize scanner with input buffer.
+ *
+ * @param buffer - source code buffer
+ */
+fun initScanner(buffer : ^char) : void {
+    input_buffer = buffer;
+    current_pos = 0;
+    line_number = 1;
+    char_position = 0;
+    current_token = TOKEN_EOS();
+    token_value = malloc(256);
+}
+
+/**
+ * Get current character without advancing.
+ */
+fun peekChar() : char {
+    return ^(input_buffer + current_pos);
+}
+
+/**
+ * Get character at offset from current position.
+ *
+ * @param offset - number of positions ahead
+ */
+fun peekAhead(offset : int) : char {
+    return ^(input_buffer + current_pos + offset);
+}
+
+/**
+ * Advance position by n characters.
+ *
+ * @param n - number of characters to skip
+ */
+fun advance(n : int) : void {
+    current_pos = current_pos + n;
+    char_position = char_position + n;
+}
+
+/**
+ * Check if at end of input.
+ */
+fun atEnd() : int {
+    return peekChar() == '\0';
+}
+
+/**
+ * Check if character is a digit (0-9).
+ *
+ * @param c - character to check
+ */
+fun isDigit(c : char) : int {
+    return (c >= '0' && c <= '9');
+}
+
+/**
+ * Check if character is a letter (a-z, A-Z).
+ *
+ * @param c - character to check
+ */
+fun isLetter(c : char) : int {
+    return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
+}
+
+/**
+ * Check if character is whitespace (space, tab, newline, carriage return).
+ *
+ * @param c - character to check
+ */
+fun isWhitespace(c : char) : int {
+    return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
+}
+
+/**
+ * Check if character can start an identifier.
+ *
+ * @param c - character to check
+ */
+fun isIdentStart(c : char) : int {
+    return (isLetter(c) || c == '_');
+}
+
+/**
+ * Check if character can be part of an identifier.
+ *
+ * @param c - character to check
+ */
+fun isIdentPart(c : char) : int {
+    return (isLetter(c) || isDigit(c) || c == '_');
+}
+
+/**
+ * Skip whitespace characters.
+ */
+fun skipWhitespace() : void {
+    c : char;
+    c = peekChar();
+
+    while (!atEnd() && isWhitespace(c)) {
+        if (c == '\n') {
+            line_number = line_number + 1;
+            char_position = 0;
+        }
+        advance(1);
+        c = peekChar();
+    }
+}
+
+/**
+ * Compare two strings for equality.
+ *
+ * @param s1 - first string
+ * @param s2 - second string
+ */
+fun strEqual(s1 : ^char, s2 : ^char) : int {
+    i : int;
+    i = 0;
+
+    while (^(s1 + i) != '\0' && ^(s2 + i) != '\0') {
+        if (^(s1 + i) != ^(s2 + i)) {
+            return 0;
+        }
+        i = i + 1;
+    }
+
+    return (^(s1 + i) == '\0' && ^(s2 + i) == '\0');
+}
+
+/**
+ * Check if identifier matches a keyword.
+ *
+ * @param ident - identifier to check
+ */
+fun matchKeyword(ident : ^char) : int {
+    if (strEqual(ident, "fun")) { return TOKEN_FUN(); }
+    if (strEqual(ident, "if")) { return TOKEN_IF(); }
+    if (strEqual(ident, "else")) { return TOKEN_ELSE(); }
+    if (strEqual(ident, "while")) { return TOKEN_WHILE(); }
+    if (strEqual(ident, "return")) { return TOKEN_RETURN(); }
+    if (strEqual(ident, "break")) { return TOKEN_BREAK(); }
+    if (strEqual(ident, "continue")) { return TOKEN_CONTINUE(); }
+    if (strEqual(ident, "void")) { return TOKEN_VOID(); }
+    if (strEqual(ident, "int")) { return TOKEN_INT(); }
+    if (strEqual(ident, "char")) { return TOKEN_CHAR(); }
+    if (strEqual(ident, "true")) { return TOKEN_TRUE(); }
+    if (strEqual(ident, "false")) { return TOKEN_FALSE(); }
+
+    return TOKEN_ID();
+}
+
+/**
+ * Read identifier or keyword token.
+ */
+fun readIdentifier() : void {
+    i : int;
+    c : char;
+
+    i = 0;
+    c = peekChar();
+
+    if (!isIdentStart(c)) {
+        current_token = TOKEN_ERROR();
+        return;
+    }
+
+    while (isIdentPart(c) && i < 255) {
+        ^(token_value + i) = c;
+        i = i + 1;
+        advance(1);
+        c = peekChar();
+    }
+
+    ^(token_value + i) = '\0';
+    current_token = matchKeyword(token_value);
+}
+
+/**
+ * Read integer literal token.
+ */
+fun readNumber() : void {
+    c : char;
+    value : int;
+
+    c = peekChar();
+
+    if (c == '0') {
+        advance(1);
+        c = peekChar();
+        if (isDigit(c)) {
+            current_token = TOKEN_ERROR();
+            return;
+        }
+        token_int_value = 0;
+        current_token = TOKEN_INT_LITERAL();
+        return;
+    }
+
+    if (!isDigit(c)) {
+        current_token = TOKEN_ERROR();
+        return;
+    }
+
+    value = 0;
+    while (isDigit(c)) {
+        value = value * 10 + (c - '0');
+        advance(1);
+        c = peekChar();
+    }
+
+    token_int_value = value;
+    current_token = TOKEN_INT_LITERAL();
+}
+
+/**
+ * Process escape sequence in string or char literal.
+ */
+fun readEscape() : char {
+    c : char;
+
+    advance(1);
+    c = peekChar();
+
+    if (c == 'n') { advance(1); return '\n'; }
+    if (c == 't') { advance(1); return '\t'; }
+    if (c == 'r') { advance(1); return '\r'; }
+    if (c == '\\') { advance(1); return '\\'; }
+    if (c == '\'') { advance(1); return '\''; }
+    if (c == '"') { advance(1); return '"'; }
+    if (c == '0') { advance(1); return '\0'; }
+
+    current_token = TOKEN_ERROR();
+    return '\0';
+}
+
+/**
+ * Read string literal token.
+ */
+fun readString() : void {
+    i : int;
+    c : char;
+
+    advance(1);
+    i = 0;
+    c = peekChar();
+
+    while (c != '"' && c != '\0' && c != '\n' && i < 255) {
+        if (c == '\\') {
+            ^(token_value + i) = readEscape();
+            if (current_token == TOKEN_ERROR()) {
+                return;
+            }
+        } else {
+            ^(token_value + i) = c;
+            advance(1);
+        }
+        i = i + 1;
+        c = peekChar();
+    }
+
+    if (c != '"') {
+        current_token = TOKEN_ERROR();
+        return;
+    }
+
+    advance(1);
+    ^(token_value + i) = '\0';
+    current_token = TOKEN_STRING_LITERAL();
+}
+
+/**
+ * Read character literal token.
+ */
+fun readChar() : void {
+    c : char;
+    value : char;
+
+    advance(1);
+    c = peekChar();
+
+    if (c == '\0' || c == '\n') {
+        current_token = TOKEN_ERROR();
+        return;
+    }
+
+    if (c == '\\') {
+        value = readEscape();
+        if (current_token == TOKEN_ERROR()) {
+            return;
+        }
+    } else {
+        value = c;
+        advance(1);
+    }
+
+    c = peekChar();
+    if (c != '\'') {
+        current_token = TOKEN_ERROR();
+        return;
+    }
+
+    advance(1);
+    token_int_value = value;
+    current_token = TOKEN_CHAR_LITERAL();
+}
+
+/**
+ * Skip single-line comment (// to end of line).
+ */
+fun skipLineComment() : void {
+    c : char;
+
+    advance(2);
+    c = peekChar();
+
+    while (c != '\n' && c != '\0') {
+        advance(1);
+        c = peekChar();
+    }
+}
+
+/**
+ * Skip block comment.
+ */
+fun skipBlockComment() : void {
+    c : char;
+
+    advance(2);
+    c = peekChar();
+
+    while (!atEnd()) {
+        if (c == '*' && peekAhead(1) == '/') {
+            advance(2);
+            return;
+        }
+
+        if (c == '\n') {
+            line_number = line_number + 1;
+            char_position = 0;
+        }
+
+        advance(1);
+        c = peekChar();
+    }
+
+    current_token = TOKEN_ERROR();
+}
+
+/**
+ * Skip whitespace and comments.
+ */
+fun skipWhitespaceAndComments() : void {
+    c : char;
+    progressed : int;
+
+    progressed = 1;
+
+    while (progressed) {
+        progressed = 0;
+
+        skipWhitespace();
+        c = peekChar();
+
+        if (c == '/' && peekAhead(1) == '/') {
+            skipLineComment();
+            progressed = 1;
+        }
+
+        if (c == '/' && peekAhead(1) == '*') {
+            skipBlockComment();
+            if (current_token == TOKEN_ERROR()) {
+                return;
+            }
+            progressed = 1;
+        }
+    }
+}
+
+/**
+ * Try to read operator or punctuation symbol.
+ * Uses maximal munch for multi-character operators.
+ */
+fun readSymbol() : int {
+    c1 : char;
+    c2 : char;
+
+    c1 = peekChar();
+    c2 = peekAhead(1);
+
+    if (c1 == '=' && c2 == '=') {
+        advance(2);
+        current_token = TOKEN_EQUAL();
+        return 1;
+    }
+
+    if (c1 == '!' && c2 == '=') {
+        advance(2);
+        current_token = TOKEN_NEQ();
+        return 1;
+    }
+
+    if (c1 == '<' && c2 == '=') {
+        advance(2);
+        current_token = TOKEN_LEQ();
+        return 1;
+    }
+
+    if (c1 == '>' && c2 == '=') {
+        advance(2);
+        current_token = TOKEN_GEQ();
+        return 1;
+    }
+
+    if (c1 == '&' && c2 == '&') {
+        advance(2);
+        current_token = TOKEN_AND();
+        return 1;
+    }
+
+    if (c1 == '|' && c2 == '|') {
+        advance(2);
+        current_token = TOKEN_OR();
+        return 1;
+    }
+
+    if (c1 == '+') { advance(1); current_token = TOKEN_ADD(); return 1; }
+    if (c1 == '-') { advance(1); current_token = TOKEN_SUBTRACT(); return 1; }
+    if (c1 == '*') { advance(1); current_token = TOKEN_MULTIPLY(); return 1; }
+    if (c1 == '/') { advance(1); current_token = TOKEN_DIVIDE(); return 1; }
+    if (c1 == '%') { advance(1); current_token = TOKEN_MOD(); return 1; }
+    if (c1 == '=') { advance(1); current_token = TOKEN_ASSIGN(); return 1; }
+    if (c1 == '<') { advance(1); current_token = TOKEN_LESS(); return 1; }
+    if (c1 == '>') { advance(1); current_token = TOKEN_GREATER(); return 1; }
+    if (c1 == '!') { advance(1); current_token = TOKEN_NOT(); return 1; }
+    if (c1 == '&') { advance(1); current_token = TOKEN_AMP(); return 1; }
+    if (c1 == '(') { advance(1); current_token = TOKEN_LPAREN(); return 1; }
+    if (c1 == ')') { advance(1); current_token = TOKEN_RPAREN(); return 1; }
+    if (c1 == '[') { advance(1); current_token = TOKEN_LSQUARE(); return 1; }
+    if (c1 == ']') { advance(1); current_token = TOKEN_RSQUARE(); return 1; }
+    if (c1 == '{') { advance(1); current_token = TOKEN_LCURL(); return 1; }
+    if (c1 == '}') { advance(1); current_token = TOKEN_RCURL(); return 1; }
+    if (c1 == ',') { advance(1); current_token = TOKEN_COMMA(); return 1; }
+    if (c1 == ';') { advance(1); current_token = TOKEN_SEMICOLON(); return 1; }
+    if (c1 == ':') { advance(1); current_token = TOKEN_COLON(); return 1; }
+
+    return 0;
+}
+
+/**
+ * Advance to next token in the input stream.
+ */
+fun nextToken() : void {
+    c : char;
+
+    skipWhitespaceAndComments();
+
+    if (atEnd()) {
+        current_token = TOKEN_EOS();
+        return;
+    }
+
+    c = peekChar();
+
+    if (readSymbol()) {
+        return;
+    }
+
+    if (c == '"') {
+        readString();
+        return;
+    }
+
+    if (c == '\'') {
+        readChar();
+        return;
+    }
+
+    if (isDigit(c)) {
+        readNumber();
+        return;
+    }
+
+    if (isIdentStart(c)) {
+        readIdentifier();
+        return;
+    }
+
+    current_token = TOKEN_ERROR();
+}
+
+/**
+ * Get current token type.
+ */
+fun getCurrentToken() : int {
+    return current_token;
+}
+
+/**
+ * Get token string value for ID or STRING_LITERAL.
+ */
+fun getTokenValue() : ^char {
+    return token_value;
+}
+
+/**
+ * Get token integer value for INT_LITERAL or CHAR_LITERAL.
+ */
+fun getTokenInt() : int {
+    return token_int_value;
+}
+
+/**
+ * Get current line number.
+ */
+fun getLineNumber() : int {
+    return line_number;
+}
+
+/**
+ * Get current character position.
+ */
+fun getCharPosition() : int {
+    return char_position;
+}
