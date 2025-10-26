@@ -2,3 +2,18 @@
 a.out
 *.class
 
+# Testing files
+test_*.shc
+test_*
+!test_inputs/
+run_tests*.sh
+quick_demo.sh
+demo.sh
+factorial
+shc_compiler
+DEMO.md
+TEST*.md
+TESTING*.txt
+PARSER_SHC_DESIGN.md
+ScannerValidator.java
+.vscode/
