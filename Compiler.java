@@ -56,7 +56,7 @@ public class Compiler {
     }
 
     output("#include <stdio.h>\n");
-    output("#include <stdlib.h>\n\n");
+    output("#include <stdlib.h>\n");
     output("#include <stdint.h>\n\n");
     for (Function function : program) {
       compileFunction(function);
@@ -69,19 +69,24 @@ public class Compiler {
    * @param function - function to compile
    */
   public static void compileFunction(Function function) {
-    switch (function.getReturnType()) {
-      case VOID:
-        output("void ");
-        break;
-      case CHAR:
-        output("uint8_t ");
-        break;
-      case INT:
-        output("uint64_t ");
-        break;
-      default:
-        reporter.printError("bad function return type");
-        System.exit(1);
+    // Special case: main() should return int for C standards compliance
+    if (function.getName().equals("main") && function.getReturnType() == SHC.INT) {
+      output("int ");
+    } else {
+      switch (function.getReturnType()) {
+        case VOID:
+          output("void ");
+          break;
+        case CHAR:
+          output("uint8_t ");
+          break;
+        case INT:
+          output("uint64_t ");
+          break;
+        default:
+          reporter.printError("bad function return type");
+          System.exit(1);
+      }
     }
 
     for (int i = 0; i < function.getNReturnReferences(); i++) {
