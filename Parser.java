@@ -3,6 +3,7 @@ import java.util.ArrayList;
 public final class Parser {
   private final SHCScanner sc;
   private final Reporter rep;
+  private final ArrayList<Variable> globalVariables = new ArrayList<>();
 
   public Parser(String filename) {
     this.sc = new SHCScanner(filename);
@@ -18,8 +19,11 @@ public final class Parser {
     while (sc.currentToken() != SHC.EOS) {
       if (sc.currentToken() == SHC.FUN) {
         funs.add(parseFunction());
+      } else if (sc.currentToken() == SHC.ID) {
+        // Top-level global declaration: name : type;
+        parseTopLevelDeclLine();
       } else {
-        error("Expected 'fun', found " + sc.currentTokenString(),
+        error("Expected 'fun' or declaration, found " + sc.currentTokenString(),
             sc.getLineIdx(), sc.getCharIdx());
       }
     }
@@ -37,6 +41,12 @@ public final class Parser {
     expect(SHC.LPAREN, "(");
     Variable[] params = parseParamList(); // name : type
     expect(SHC.RPAREN, ")");
+
+    // Add globals and parameters to local variables so they can be referenced in function body
+    localVariables.addAll(globalVariables);
+    for (Variable param : params) {
+      localVariables.add(param);
+    }
     expect(SHC.COLON, ":");
 
     // return-type := type-spec | void
@@ -58,6 +68,12 @@ public final class Parser {
 
     // include pointer depth on return type
     return new Function(retBase, retStars, name, params, new Variable[0], body, line, col);
+  }
+
+  // Top-level global declaration: name : type;
+  private void parseTopLevelDeclLine() {
+    String name = expectId("global variable name");
+    parseDeclLineStartingWith(globalVariables, name);
   }
 
   // ===================== types (name : ^*base) =====================
@@ -142,15 +158,13 @@ public final class Parser {
         || t == SHC.INT_LITERAL || t == SHC.CHAR_LITERAL || t == SHC.STRING_LITERAL || t == SHC.TRUE || t == SHC.FALSE;
   }
 
-  private Variable getVariableByName(ArrayList<Variable> localVariables, String name) {
+  private Variable getVariableByName(ArrayList<Variable> localVariables, String name, int line, int col) {
     for (Variable variable : localVariables) {
       if (variable.getName().equals(name)) {
         return variable;
       }
     }
-    // TODO - make better error statement
-    System.out.println("ERROR: Variable not found" + name);
-    System.exit(1);
+    error("Variable '" + name + "' not found", line, col);
     return null;
   }
 
@@ -229,7 +243,7 @@ public final class Parser {
             sc.nextToken();
             OrExpression rhs = parseOrBase(localVariables);
             expect(SHC.SEMICOLON, ";");
-            Variable v = getVariableByName(localVariables, firstName);
+            Variable v = getVariableByName(localVariables, firstName, line, col);
             Factor.Var lhs = new Factor.Var(v, 0, line, col);
             Assignment asg = new Assignment(lhs, rhs, line, col);
             return new Statement.Assign(asg, line, col);
@@ -252,7 +266,7 @@ public final class Parser {
           expect(SHC.ASSIGN, "=");
           OrExpression rhs = parseOrBase(localVariables);
           expect(SHC.SEMICOLON, ";");
-          Variable v = getVariableByName(localVariables, name);
+          Variable v = getVariableByName(localVariables, name, line, col);
           Factor.Var lhs = new Factor.Var(v, hats, line, col);
           Assignment asg = new Assignment(lhs, rhs, line, col);
           return new Statement.Assign(asg, line, col);
@@ -445,7 +459,7 @@ public final class Parser {
           Function callee = new Function(SHC.VOID, id, new Variable[0], new Variable[0], new Statement[0], line, col);
           return new Factor.Call(callee, args.toArray(Expression[]::new), line, col);
         } else {
-          Variable v = getVariableByName(localVariables, id);
+          Variable v = getVariableByName(localVariables, id, line, col);
           return new Factor.Var(v, depth, line, col);
         }
       }
