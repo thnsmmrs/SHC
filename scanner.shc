@@ -1,0 +1,115 @@
+/**
+ * Scanner for SHC language.
+ * Tokenizes SHC source code into tokens for parsing.
+ *
+ * @author SWY
+ */
+
+/* Token type constants matching SHC enum */
+fun TOKEN_FUN() : int { return 0; }
+fun TOKEN_IF() : int { return 1; }
+fun TOKEN_ELSE() : int { return 2; }
+fun TOKEN_WHILE() : int { return 3; }
+fun TOKEN_RETURN() : int { return 4; }
+fun TOKEN_BREAK() : int { return 5; }
+fun TOKEN_CONTINUE() : int { return 6; }
+fun TOKEN_VOID() : int { return 7; }
+fun TOKEN_INT() : int { return 8; }
+fun TOKEN_CHAR() : int { return 9; }
+
+fun TOKEN_AND() : int { return 10; }
+fun TOKEN_OR() : int { return 11; }
+fun TOKEN_NOT() : int { return 12; }
+
+fun TOKEN_ADD() : int { return 13; }
+fun TOKEN_SUBTRACT() : int { return 14; }
+fun TOKEN_MULTIPLY() : int { return 15; }
+fun TOKEN_DIVIDE() : int { return 16; }
+fun TOKEN_MOD() : int { return 17; }
+
+fun TOKEN_ASSIGN() : int { return 18; }
+fun TOKEN_EQUAL() : int { return 19; }
+fun TOKEN_NEQ() : int { return 20; }
+fun TOKEN_LESS() : int { return 21; }
+fun TOKEN_GREATER() : int { return 22; }
+fun TOKEN_LEQ() : int { return 23; }
+fun TOKEN_GEQ() : int { return 24; }
+
+fun TOKEN_AMP() : int { return 25; }
+
+fun TOKEN_COLON() : int { return 26; }
+fun TOKEN_SEMICOLON() : int { return 27; }
+fun TOKEN_COMMA() : int { return 28; }
+fun TOKEN_LPAREN() : int { return 29; }
+fun TOKEN_RPAREN() : int { return 30; }
+fun TOKEN_LSQUARE() : int { return 31; }
+fun TOKEN_RSQUARE() : int { return 32; }
+fun TOKEN_LCURL() : int { return 33; }
+fun TOKEN_RCURL() : int { return 34; }
+
+fun TOKEN_ID() : int { return 35; }
+fun TOKEN_STRING_LITERAL() : int { return 36; }
+fun TOKEN_INT_LITERAL() : int { return 37; }
+fun TOKEN_CHAR_LITERAL() : int { return 38; }
+fun TOKEN_BOOL_LITERAL() : int { return 39; }
+fun TOKEN_TRUE() : int { return 40; }
+fun TOKEN_FALSE() : int { return 41; }
+
+fun TOKEN_EOS() : int { return 42; }
+fun TOKEN_ERROR() : int { return 43; }
+
+/* Global scanner state */
+input_buffer : ^char;
+current_pos : int;
+line_number : int;
+char_position : int;
+current_token : int;
+token_value : ^char;
+token_int_value : int;
+
+/**
+ * Initialize scanner with input buffer.
+ *
+ * @param buffer - source code buffer
+ */
+fun initScanner(buffer : ^char) : void {
+    input_buffer = buffer;
+    current_pos = 0;
+    line_number = 1;
+    char_position = 0;
+    current_token = TOKEN_EOS();
+    token_value = malloc(256);
+}
+
+/**
+ * Get current character without advancing.
+ */
+fun peekChar() : char {
+    return ^(input_buffer + current_pos);
+}
+
+/**
+ * Get character at offset from current position.
+ *
+ * @param offset - number of positions ahead
+ */
+fun peekAhead(offset : int) : char {
+    return ^(input_buffer + current_pos + offset);
+}
+
+/**
+ * Advance position by n characters.
+ *
+ * @param n - number of characters to skip
+ */
+fun advance(n : int) : void {
+    current_pos = current_pos + n;
+    char_position = char_position + n;
+}
+
+/**
+ * Check if at end of input.
+ */
+fun atEnd() : int {
+    return peekChar() == '\0';
+}
