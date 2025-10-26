@@ -243,3 +243,40 @@ fun readIdentifier() : void {
     ^(token_value + i) = '\0';
     current_token = matchKeyword(token_value);
 }
+
+/**
+ * Read integer literal token.
+ */
+fun readNumber() : void {
+    c : char;
+    value : int;
+
+    c = peekChar();
+
+    if (c == '0') {
+        advance(1);
+        c = peekChar();
+        if (isDigit(c)) {
+            current_token = TOKEN_ERROR();
+            return;
+        }
+        token_int_value = 0;
+        current_token = TOKEN_INT_LITERAL();
+        return;
+    }
+
+    if (!isDigit(c)) {
+        current_token = TOKEN_ERROR();
+        return;
+    }
+
+    value = 0;
+    while (isDigit(c)) {
+        value = value * 10 + (c - '0');
+        advance(1);
+        c = peekChar();
+    }
+
+    token_int_value = value;
+    current_token = TOKEN_INT_LITERAL();
+}
