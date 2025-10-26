@@ -273,13 +273,893 @@ fun allocVariable() : ^int {
 
 /* ============================================================================
  * NODE ACCESSOR FUNCTIONS (getters/setters)
- * ============================================================================
- *
- * These will be implemented incrementally as we build the parser.
- * For now, we have the foundation.
- */
+ * ============================================================================ */
 
-/* TO BE CONTINUED... */
+/* ============================================================================
+ * EXPRESSION NODE ACCESSORS
+ * ============================================================================ */
+
+/* Binary expression: [type][line][col][operator][left_ptr][right_ptr] */
+
+fun getBinaryOp(node : ^int) : int {
+    temp : ^int;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setBinaryOp(node : ^int, op : int) : void {
+    temp : ^int;
+    temp = node + 3;
+    ^temp = op;
+}
+
+fun getBinaryLeft(node : ^int) : ^int {
+    temp : ^^int;
+    temp = node + 4;
+    return ^temp;
+}
+
+fun setBinaryLeft(node : ^int, left : ^int) : void {
+    temp : ^^int;
+    temp = node + 4;
+    ^temp = left;
+}
+
+fun getBinaryRight(node : ^int) : ^int {
+    temp : ^^int;
+    temp = node + 5;
+    return ^temp;
+}
+
+fun setBinaryRight(node : ^int, right : ^int) : void {
+    temp : ^^int;
+    temp = node + 5;
+    ^temp = right;
+}
+
+/* Unary expression: [type][line][col][operator][operand_ptr] */
+
+fun getUnaryOp(node : ^int) : int {
+    temp : ^int;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setUnaryOp(node : ^int, op : int) : void {
+    temp : ^int;
+    temp = node + 3;
+    ^temp = op;
+}
+
+fun getUnaryOperand(node : ^int) : ^int {
+    temp : ^^int;
+    temp = node + 4;
+    return ^temp;
+}
+
+fun setUnaryOperand(node : ^int, operand : ^int) : void {
+    temp : ^^int;
+    temp = node + 4;
+    ^temp = operand;
+}
+
+/* Literal expression: [type][line][col][value_type][int_value] */
+
+fun getLiteralType(node : ^int) : int {
+    temp : ^int;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setLiteralType(node : ^int, valType : int) : void {
+    temp : ^int;
+    temp = node + 3;
+    ^temp = valType;
+}
+
+fun getLiteralValue(node : ^int) : int {
+    temp : ^int;
+    temp = node + 4;
+    return ^temp;
+}
+
+fun setLiteralValue(node : ^int, val : int) : void {
+    temp : ^int;
+    temp = node + 4;
+    ^temp = val;
+}
+
+/* Variable expression: [type][line][col][name_ptr][deref_count] */
+
+fun getVarName(node : ^int) : ^char {
+    temp : ^^char;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setVarName(node : ^int, name : ^char) : void {
+    temp : ^^char;
+    temp = node + 3;
+    ^temp = name;
+}
+
+fun getVarDerefCount(node : ^int) : int {
+    temp : ^int;
+    temp = node + 4;
+    return ^temp;
+}
+
+fun setVarDerefCount(node : ^int, count : int) : void {
+    temp : ^int;
+    temp = node + 4;
+    ^temp = count;
+}
+
+/* Call expression: [type][line][col][name_ptr][args_ptr][arg_count] */
+
+fun getCallName(node : ^int) : ^char {
+    temp : ^^char;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setCallName(node : ^int, name : ^char) : void {
+    temp : ^^char;
+    temp = node + 3;
+    ^temp = name;
+}
+
+fun getCallArgs(node : ^int) : ^^int {
+    temp : ^^^int;
+    temp = node + 4;
+    return ^temp;
+}
+
+fun setCallArgs(node : ^int, args : ^^int) : void {
+    temp : ^^^int;
+    temp = node + 4;
+    ^temp = args;
+}
+
+fun getCallArgCount(node : ^int) : int {
+    temp : ^int;
+    temp = node + 5;
+    return ^temp;
+}
+
+fun setCallArgCount(node : ^int, count : int) : void {
+    temp : ^int;
+    temp = node + 5;
+    ^temp = count;
+}
+
+/* ============================================================================
+ * STATEMENT NODE ACCESSORS
+ * ============================================================================ */
+
+/* If statement: [type][line][col][cond_ptr][then_ptr][then_count][else_ptr][else_count] */
+
+fun getIfCondition(node : ^int) : ^int {
+    temp : ^^int;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setIfCondition(node : ^int, cond : ^int) : void {
+    temp : ^^int;
+    temp = node + 3;
+    ^temp = cond;
+}
+
+fun getIfThen(node : ^int) : ^^int {
+    temp : ^^^int;
+    temp = node + 4;
+    return ^temp;
+}
+
+fun setIfThen(node : ^int, thenBlock : ^^int) : void {
+    temp : ^^^int;
+    temp = node + 4;
+    ^temp = thenBlock;
+}
+
+fun getIfThenCount(node : ^int) : int {
+    temp : ^int;
+    temp = node + 5;
+    return ^temp;
+}
+
+fun setIfThenCount(node : ^int, count : int) : void {
+    temp : ^int;
+    temp = node + 5;
+    ^temp = count;
+}
+
+fun getIfElse(node : ^int) : ^^int {
+    temp : ^^^int;
+    temp = node + 6;
+    return ^temp;
+}
+
+fun setIfElse(node : ^int, elseBlock : ^^int) : void {
+    temp : ^^^int;
+    temp = node + 6;
+    ^temp = elseBlock;
+}
+
+fun getIfElseCount(node : ^int) : int {
+    temp : ^int;
+    temp = node + 7;
+    return ^temp;
+}
+
+fun setIfElseCount(node : ^int, count : int) : void {
+    temp : ^int;
+    temp = node + 7;
+    ^temp = count;
+}
+
+/* While statement: [type][line][col][cond_ptr][body_ptr][body_count] */
+
+fun getWhileCondition(node : ^int) : ^int {
+    temp : ^^int;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setWhileCondition(node : ^int, cond : ^int) : void {
+    temp : ^^int;
+    temp = node + 3;
+    ^temp = cond;
+}
+
+fun getWhileBody(node : ^int) : ^^int {
+    temp : ^^^int;
+    temp = node + 4;
+    return ^temp;
+}
+
+fun setWhileBody(node : ^int, body : ^^int) : void {
+    temp : ^^^int;
+    temp = node + 4;
+    ^temp = body;
+}
+
+fun getWhileBodyCount(node : ^int) : int {
+    temp : ^int;
+    temp = node + 5;
+    return ^temp;
+}
+
+fun setWhileBodyCount(node : ^int, count : int) : void {
+    temp : ^int;
+    temp = node + 5;
+    ^temp = count;
+}
+
+/* Return statement: [type][line][col][has_value][value_ptr] */
+
+fun getReturnHasValue(node : ^int) : int {
+    temp : ^int;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setReturnHasValue(node : ^int, hasVal : int) : void {
+    temp : ^int;
+    temp = node + 3;
+    ^temp = hasVal;
+}
+
+fun getReturnValue(node : ^int) : ^int {
+    temp : ^^int;
+    temp = node + 4;
+    return ^temp;
+}
+
+fun setReturnValue(node : ^int, val : ^int) : void {
+    temp : ^^int;
+    temp = node + 4;
+    ^temp = val;
+}
+
+/* Declaration statement: [type][line][col][var_ptr] */
+
+fun getDeclVariable(node : ^int) : ^int {
+    temp : ^^int;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setDeclVariable(node : ^int, varNode : ^int) : void {
+    temp : ^^int;
+    temp = node + 3;
+    ^temp = varNode;
+}
+
+/* Assignment statement: [type][line][col][lhs_ptr][rhs_ptr] */
+
+fun getAssignLhs(node : ^int) : ^int {
+    temp : ^^int;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setAssignLhs(node : ^int, lhs : ^int) : void {
+    temp : ^^int;
+    temp = node + 3;
+    ^temp = lhs;
+}
+
+fun getAssignRhs(node : ^int) : ^int {
+    temp : ^^int;
+    temp = node + 4;
+    return ^temp;
+}
+
+fun setAssignRhs(node : ^int, rhs : ^int) : void {
+    temp : ^^int;
+    temp = node + 4;
+    ^temp = rhs;
+}
+
+/* Call statement: [type][line][col][name_ptr][args_ptr][arg_count] */
+/* Note: These are identical to call expression accessors, but included for clarity */
+
+fun getStmtCallName(node : ^int) : ^char {
+    temp : ^^char;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setStmtCallName(node : ^int, name : ^char) : void {
+    temp : ^^char;
+    temp = node + 3;
+    ^temp = name;
+}
+
+fun getStmtCallArgs(node : ^int) : ^^int {
+    temp : ^^^int;
+    temp = node + 4;
+    return ^temp;
+}
+
+fun setStmtCallArgs(node : ^int, args : ^^int) : void {
+    temp : ^^^int;
+    temp = node + 4;
+    ^temp = args;
+}
+
+fun getStmtCallArgCount(node : ^int) : int {
+    temp : ^int;
+    temp = node + 5;
+    return ^temp;
+}
+
+fun setStmtCallArgCount(node : ^int, count : int) : void {
+    temp : ^int;
+    temp = node + 5;
+    ^temp = count;
+}
+
+/* ============================================================================
+ * FUNCTION AND VARIABLE NODE ACCESSORS
+ * ============================================================================ */
+
+/* Function: [type][line][col][ret_type][ret_stars][name_ptr][params_ptr][param_count][body_ptr][body_count] */
+
+fun getFunctionRetType(node : ^int) : int {
+    temp : ^int;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setFunctionRetType(node : ^int, retType : int) : void {
+    temp : ^int;
+    temp = node + 3;
+    ^temp = retType;
+}
+
+fun getFunctionRetStars(node : ^int) : int {
+    temp : ^int;
+    temp = node + 4;
+    return ^temp;
+}
+
+fun setFunctionRetStars(node : ^int, stars : int) : void {
+    temp : ^int;
+    temp = node + 4;
+    ^temp = stars;
+}
+
+fun getFunctionName(node : ^int) : ^char {
+    temp : ^^char;
+    temp = node + 5;
+    return ^temp;
+}
+
+fun setFunctionName(node : ^int, name : ^char) : void {
+    temp : ^^char;
+    temp = node + 5;
+    ^temp = name;
+}
+
+fun getFunctionParams(node : ^int) : ^^int {
+    temp : ^^^int;
+    temp = node + 6;
+    return ^temp;
+}
+
+fun setFunctionParams(node : ^int, params : ^^int) : void {
+    temp : ^^^int;
+    temp = node + 6;
+    ^temp = params;
+}
+
+fun getFunctionParamCount(node : ^int) : int {
+    temp : ^int;
+    temp = node + 7;
+    return ^temp;
+}
+
+fun setFunctionParamCount(node : ^int, count : int) : void {
+    temp : ^int;
+    temp = node + 7;
+    ^temp = count;
+}
+
+fun getFunctionBody(node : ^int) : ^^int {
+    temp : ^^^int;
+    temp = node + 8;
+    return ^temp;
+}
+
+fun setFunctionBody(node : ^int, body : ^^int) : void {
+    temp : ^^^int;
+    temp = node + 8;
+    ^temp = body;
+}
+
+fun getFunctionBodyCount(node : ^int) : int {
+    temp : ^int;
+    temp = node + 9;
+    return ^temp;
+}
+
+fun setFunctionBodyCount(node : ^int, count : int) : void {
+    temp : ^int;
+    temp = node + 9;
+    ^temp = count;
+}
+
+/* Variable: [type][line][col][base_type][stars][name_ptr] */
+
+fun getVariableBaseType(node : ^int) : int {
+    temp : ^int;
+    temp = node + 3;
+    return ^temp;
+}
+
+fun setVariableBaseType(node : ^int, baseType : int) : void {
+    temp : ^int;
+    temp = node + 3;
+    ^temp = baseType;
+}
+
+fun getVariableStars(node : ^int) : int {
+    temp : ^int;
+    temp = node + 4;
+    return ^temp;
+}
+
+fun setVariableStars(node : ^int, stars : int) : void {
+    temp : ^int;
+    temp = node + 4;
+    ^temp = stars;
+}
+
+fun getVariableName(node : ^int) : ^char {
+    temp : ^^char;
+    temp = node + 5;
+    return ^temp;
+}
+
+fun setVariableName(node : ^int, name : ^char) : void {
+    temp : ^^char;
+    temp = node + 5;
+    ^temp = name;
+}
+
+/* ============================================================================
+ * COMMON NODE ACCESSORS
+ * ============================================================================ */
+
+/**
+ * Get node type (first field of all nodes).
+ */
+fun getNodeType(node : ^int) : int {
+    return ^node;
+}
+
+/**
+ * Get node line number (second field of all nodes).
+ */
+fun getNodeLine(node : ^int) : int {
+    temp : ^int;
+    temp = node + 1;
+    return ^temp;
+}
+
+/**
+ * Get node column number (third field of all nodes).
+ */
+fun getNodeCol(node : ^int) : int {
+    temp : ^int;
+    temp = node + 2;
+    return ^temp;
+}
+
+/* ============================================================================
+ * EXPRESSION PARSING FUNCTIONS
+ * ============================================================================ */
+
+/**
+ * Parse primary expression (highest precedence).
+ * Handles: literals, identifiers, function calls, parentheses, dereferences
+ * @return expression node pointer
+ */
+fun parsePrimaryExpression() : ^int {
+    node : ^int;
+    name : ^char;
+    args : ^^int;
+    argCount : int;
+    argCapacity : int;
+    expr : ^int;
+    derefCount : int;
+
+    // Integer literal
+    if (match(TOKEN_INT_LITERAL())) {
+        node = allocExpression(NODE_EXPR_LITERAL(), EXPR_LITERAL_SIZE());
+        setLiteralType(node, TOKEN_INT_LITERAL());
+        setLiteralValue(node, parser_token_int);
+        parserNextToken();
+        return node;
+    }
+
+    // Character literal
+    if (match(TOKEN_CHAR_LITERAL())) {
+        node = allocExpression(NODE_EXPR_LITERAL(), EXPR_LITERAL_SIZE());
+        setLiteralType(node, TOKEN_CHAR_LITERAL());
+        setLiteralValue(node, parser_token_int);
+        parserNextToken();
+        return node;
+    }
+
+    // String literal
+    if (match(TOKEN_STRING_LITERAL())) {
+        node = allocExpression(NODE_EXPR_LITERAL(), EXPR_LITERAL_SIZE());
+        setLiteralType(node, TOKEN_STRING_LITERAL());
+        // Store pointer to string value (cast to int)
+        setLiteralValue(node, 0);  // TODO: handle string value properly
+        parserNextToken();
+        return node;
+    }
+
+    // Parenthesized expression
+    if (match(TOKEN_LPAREN())) {
+        parserNextToken();
+        expr = parseExpression();
+        expect(TOKEN_RPAREN(), "Expected ')'");
+        return expr;
+    }
+
+    // Pointer dereference: ^expr
+    if (match(TOKEN_MULTIPLY())) {  // Using ^ which scans as MULTIPLY
+        parserNextToken();
+        expr = parsePrimaryExpression();
+        // Wrap in a dereference expression
+        // For now, treat as unary operation
+        node = allocExpression(NODE_EXPR_UNARY(), EXPR_UNARY_SIZE());
+        setUnaryOp(node, TOKEN_MULTIPLY());
+        setUnaryOperand(node, expr);
+        return node;
+    }
+
+    // Identifier or function call
+    if (match(TOKEN_ID())) {
+        name = parser_token_value;
+        parserNextToken();
+
+        // Check for function call: ID '(' args ')'
+        if (match(TOKEN_LPAREN())) {
+            parserNextToken();
+
+            // Parse argument list
+            argCapacity = 8;
+            args = malloc(argCapacity * 8);  // array of pointers
+            argCount = 0;
+
+            if (match(TOKEN_RPAREN()) == 0) {
+                // Parse arguments
+                while (1) {
+                    // Grow array if needed
+                    if (argCount >= argCapacity) {
+                        argCapacity = argCapacity * 2;
+                        // TODO: realloc args array
+                    }
+
+                    // Parse argument expression
+                    temp : ^^int;
+                    temp = args + argCount;
+                    ^temp = parseExpression();
+                    argCount = argCount + 1;
+
+                    // Check for more arguments
+                    if (match(TOKEN_COMMA())) {
+                        parserNextToken();
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            expect(TOKEN_RPAREN(), "Expected ')'");
+
+            // Create call expression node
+            node = allocExpression(NODE_EXPR_CALL(), EXPR_CALL_SIZE());
+            setCallName(node, name);
+            setCallArgs(node, args);
+            setCallArgCount(node, argCount);
+            return node;
+        }
+
+        // Variable reference (possibly with dereferences)
+        derefCount = 0;
+        node = allocExpression(NODE_EXPR_VAR(), EXPR_VAR_SIZE());
+        setVarName(node, name);
+        setVarDerefCount(node, derefCount);
+        return node;
+    }
+
+    // Error: unexpected token
+    printError("Expected expression", parser_token_line, parser_token_col);
+    parser_error_count = parser_error_count + 1;
+    // Return dummy literal node
+    node = allocExpression(NODE_EXPR_LITERAL(), EXPR_LITERAL_SIZE());
+    setLiteralType(node, TOKEN_INT_LITERAL());
+    setLiteralValue(node, 0);
+    return node;
+}
+
+/**
+ * Parse unary expression.
+ * Handles: !, -, &, ^ (address-of and dereference)
+ * @return expression node pointer
+ */
+fun parseUnaryExpression() : ^int {
+    node : ^int;
+    operand : ^int;
+    op : int;
+
+    // Unary minus: -expr
+    if (match(TOKEN_SUBTRACT())) {
+        op = TOKEN_SUBTRACT();
+        parserNextToken();
+        operand = parseUnaryExpression();  // Right-associative
+        node = allocExpression(NODE_EXPR_UNARY(), EXPR_UNARY_SIZE());
+        setUnaryOp(node, op);
+        setUnaryOperand(node, operand);
+        return node;
+    }
+
+    // Logical not: !expr
+    if (match(TOKEN_NOT())) {
+        op = TOKEN_NOT();
+        parserNextToken();
+        operand = parseUnaryExpression();  // Right-associative
+        node = allocExpression(NODE_EXPR_UNARY(), EXPR_UNARY_SIZE());
+        setUnaryOp(node, op);
+        setUnaryOperand(node, operand);
+        return node;
+    }
+
+    // Address-of: &expr
+    if (match(TOKEN_AMP())) {
+        op = TOKEN_AMP();
+        parserNextToken();
+        operand = parseUnaryExpression();  // Right-associative
+        node = allocExpression(NODE_EXPR_UNARY(), EXPR_UNARY_SIZE());
+        setUnaryOp(node, op);
+        setUnaryOperand(node, operand);
+        return node;
+    }
+
+    // Otherwise, parse primary expression
+    return parsePrimaryExpression();
+}
+
+/**
+ * Parse multiplicative expression (*, /, %).
+ * Left-associative.
+ * @return expression node pointer
+ */
+fun parseMultiplicativeExpression() : ^int {
+    left : ^int;
+    right : ^int;
+    node : ^int;
+    op : int;
+
+    left = parseUnaryExpression();
+
+    while (match(TOKEN_MULTIPLY()) || match(TOKEN_DIVIDE()) || match(TOKEN_MOD())) {
+        op = parser_current_token;
+        parserNextToken();
+        right = parseUnaryExpression();
+
+        // Create binary expression node
+        node = allocExpression(NODE_EXPR_BINARY(), EXPR_BINARY_SIZE());
+        setBinaryOp(node, op);
+        setBinaryLeft(node, left);
+        setBinaryRight(node, right);
+        left = node;
+    }
+
+    return left;
+}
+
+/**
+ * Parse additive expression (+, -).
+ * Left-associative.
+ * @return expression node pointer
+ */
+fun parseAdditiveExpression() : ^int {
+    left : ^int;
+    right : ^int;
+    node : ^int;
+    op : int;
+
+    left = parseMultiplicativeExpression();
+
+    while (match(TOKEN_ADD()) || match(TOKEN_SUBTRACT())) {
+        op = parser_current_token;
+        parserNextToken();
+        right = parseMultiplicativeExpression();
+
+        // Create binary expression node
+        node = allocExpression(NODE_EXPR_BINARY(), EXPR_BINARY_SIZE());
+        setBinaryOp(node, op);
+        setBinaryLeft(node, left);
+        setBinaryRight(node, right);
+        left = node;
+    }
+
+    return left;
+}
+
+/**
+ * Parse relational expression (<, >, <=, >=).
+ * Left-associative.
+ * @return expression node pointer
+ */
+fun parseRelationalExpression() : ^int {
+    left : ^int;
+    right : ^int;
+    node : ^int;
+    op : int;
+
+    left = parseAdditiveExpression();
+
+    while (match(TOKEN_LESS()) || match(TOKEN_GREATER()) ||
+           match(TOKEN_LEQ()) || match(TOKEN_GEQ())) {
+        op = parser_current_token;
+        parserNextToken();
+        right = parseAdditiveExpression();
+
+        // Create binary expression node
+        node = allocExpression(NODE_EXPR_BINARY(), EXPR_BINARY_SIZE());
+        setBinaryOp(node, op);
+        setBinaryLeft(node, left);
+        setBinaryRight(node, right);
+        left = node;
+    }
+
+    return left;
+}
+
+/**
+ * Parse equality expression (==, !=).
+ * Left-associative.
+ * @return expression node pointer
+ */
+fun parseEqualityExpression() : ^int {
+    left : ^int;
+    right : ^int;
+    node : ^int;
+    op : int;
+
+    left = parseRelationalExpression();
+
+    while (match(TOKEN_EQUAL()) || match(TOKEN_NEQ())) {
+        op = parser_current_token;
+        parserNextToken();
+        right = parseRelationalExpression();
+
+        // Create binary expression node
+        node = allocExpression(NODE_EXPR_BINARY(), EXPR_BINARY_SIZE());
+        setBinaryOp(node, op);
+        setBinaryLeft(node, left);
+        setBinaryRight(node, right);
+        left = node;
+    }
+
+    return left;
+}
+
+/**
+ * Parse and expression (&&).
+ * Left-associative.
+ * @return expression node pointer
+ */
+fun parseAndExpression() : ^int {
+    left : ^int;
+    right : ^int;
+    node : ^int;
+    op : int;
+
+    left = parseEqualityExpression();
+
+    while (match(TOKEN_AND())) {
+        op = parser_current_token;
+        parserNextToken();
+        right = parseEqualityExpression();
+
+        // Create binary expression node
+        node = allocExpression(NODE_EXPR_BINARY(), EXPR_BINARY_SIZE());
+        setBinaryOp(node, op);
+        setBinaryLeft(node, left);
+        setBinaryRight(node, right);
+        left = node;
+    }
+
+    return left;
+}
+
+/**
+ * Parse or expression (||).
+ * Left-associative.
+ * @return expression node pointer
+ */
+fun parseOrExpression() : ^int {
+    left : ^int;
+    right : ^int;
+    node : ^int;
+    op : int;
+
+    left = parseAndExpression();
+
+    while (match(TOKEN_OR())) {
+        op = parser_current_token;
+        parserNextToken();
+        right = parseAndExpression();
+
+        // Create binary expression node
+        node = allocExpression(NODE_EXPR_BINARY(), EXPR_BINARY_SIZE());
+        setBinaryOp(node, op);
+        setBinaryLeft(node, left);
+        setBinaryRight(node, right);
+        left = node;
+    }
+
+    return left;
+}
+
+/**
+ * Parse expression (top-level entry point).
+ * @return expression node pointer
+ */
+fun parseExpression() : ^int {
+    return parseOrExpression();
+}
 
 /**
  * Main parser entry point.
