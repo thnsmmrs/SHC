@@ -1,0 +1,502 @@
+// ====== Token enum (as provided) ======
+enum SHC {
+    // Keywords
+    FUN, IF, ELSE, WHILE, RETURN, BREAK, CONTINUE, VOID, INT, CHAR,
+
+    // Logical operators
+    AND, OR, NOT,
+
+    // Arithmetic operators
+    ADD, SUBTRACT, MULTIPLY, DIVIDE, MOD,
+
+    // Assignment and comparisons
+    ASSIGN, EQUAL, NEQ, LESS, GREATER, LEQ, GEQ,
+
+    // Unary-only operator (address-of)
+    CARET,
+
+    // Punctuation
+    COLON, SEMICOLON, COMMA, LPAREN, RPAREN, LSQUARE, RSQUARE, LCURL, RCURL,
+
+    // Identifiers and literals
+    ID, STRING_LITERAL, INT_LITERAL, CHAR_LITERAL, BOOL_LITERAL, TRUE, FALSE,
+
+    // Control tokens
+    EOS, ERROR
+}
+
+// =============================
+// ===== String/char utils =====
+// =============================
+
+// NOTE: SHC has only int/char/void types. We'll model strings as char[].
+
+fun str_len(s: char[]): int {
+    int i = 0;
+    while (s[i] != '\0') { i = i + 1; }
+    return i;
+}
+
+fun str_eq(a: char[], b: char[]): int {
+    int la = str_len(a);
+    int lb = str_len(b);
+    if (la != lb) { return 0; }
+    int i = 0;
+    while (i < la) {
+        if (a[i] != b[i]) { return 0; }
+        i = i + 1;
+    }
+    return 1;
+}
+
+fun str_copy(src: char[]): char[] {
+    int n = str_len(src);
+    char[] out = new char[n + 1];
+    int i = 0;
+    while (i < n) { out[i] = src[i]; i = i + 1; }
+    out[n] = '\0';
+    return out;
+}
+
+fun str_sub(src: char[], start: int, end_exclusive: int): char[] {
+    if (start < 0) { start = 0; }
+    int n = str_len(src);
+    if (end_exclusive > n) { end_exclusive = n; }
+    if (end_exclusive < start) { end_exclusive = start; }
+    int len = end_exclusive - start;
+    char[] out = new char[len + 1];
+    int i = 0;
+    while (i < len) {
+        out[i] = src[start + i];
+        i = i + 1;
+    }
+    out[len] = '\0';
+    return out;
+}
+
+fun str_starts_with_at(src: char[], pattern: char[], pos: int): int {
+    int i = 0;
+    while (pattern[i] != '\0') {
+        if (src[pos + i] == '\0') { return 0; }
+        if (src[pos + i] != pattern[i]) { return 0; }
+        i = i + 1;
+    }
+    return 1;
+}
+
+fun is_digit(c: char): int { return c >= '0' && c <= '9'; }
+fun is_letter(c: char): int { return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'); }
+fun is_ident_start(c: char): int { return c == '_' || is_letter(c); }
+fun is_ident_part(c: char): int { return is_ident_start(c) || is_digit(c); }
+fun is_whitespace(c: char): int { return c == ' ' || c == '\t' || c == '\r' || c == '\n'; }
+
+// Append one char to a char[] (returns a new char[])
+fun str_append_char(s: char[], c: char): char[] {
+    int n = str_len(s);
+    char[] out = new char[n + 2];
+    int i = 0;
+    while (i < n) { out[i] = s[i]; i = i + 1; }
+    out[n] = c;
+    out[n + 1] = '\0';
+    return out;
+}
+
+// ===============================
+// ===== Scanner state/consts =====
+// ===============================
+
+// Source text and positions
+char[] SRC;         // entire file as a null-terminated char[]
+int SRC_LEN;        // cached length
+int POS = 0;        // absolute index into SRC
+int LINE = 1;       // 1-based
+int COL  = 0;       // 0-based
+
+// Current token and payloads (mirrors Java scanner API)
+SHC CURRENT_TOKEN = SHC.ERROR;
+char[] LATEST_IDENTIFIER = "";
+int    LATEST_INT = 0;     // also used for BOOL_LITERAL: 1/0
+int    LATEST_CHAR = 0;
+char[] LATEST_STRING = "";
+char[] CURRENT_TOKEN_LINE = "";
+
+// Keywords
+char[][] KEYWORDS = {
+    "fun", "if", "else", "while", "return", "break",
+    "continue", "void", "int", "char"
+};
+
+SHC[] KEYWORD_TOKENS = {
+    SHC.FUN, SHC.IF, SHC.ELSE, SHC.WHILE, SHC.RETURN, SHC.BREAK,
+    SHC.CONTINUE, SHC.VOID, SHC.INT, SHC.CHAR
+};
+
+// Symbols/operators (two-char first = maximal munch)
+char[][] SYM = {
+    "==", "!=", "<=", ">=", "&&", "||",
+    "+", "-", "*", "/", "%",
+    "=", "<", ">", "!", "^",
+    "(", ")", "[", "]", "{", "}",
+    ",", ";", ":"
+};
+SHC[] SYM_TOK = {
+    SHC.EQUAL, SHC.NEQ, SHC.LEQ, SHC.GEQ, SHC.AND, SHC.OR,
+    SHC.ADD, SHC.SUBTRACT, SHC.MULTIPLY, SHC.DIVIDE, SHC.MOD,
+    SHC.ASSIGN, SHC.LESS, SHC.GREATER, SHC.NOT, SHC.CARET,
+    SHC.LPAREN, SHC.RPAREN, SHC.LSQUARE, SHC.RSQUARE, SHC.LCURL, SHC.RCURL,
+    SHC.COMMA, SHC.SEMICOLON, SHC.COLON
+};
+
+// ==========================
+// ===== Source helpers =====
+// ==========================
+
+fun at_eof(): int { return POS >= SRC_LEN || SRC[POS] == '\0'; }
+
+fun cur(): char {
+    if (at_eof() == 1) { return '\0'; }
+    return SRC[POS];
+}
+
+fun peek(ahead: int): char {
+    int i = POS + ahead;
+    if (i >= SRC_LEN) { return '\0'; }
+    return SRC[i];
+}
+
+fun advance(n: int): void {
+    int k = 0;
+    while (k < n && at_eof() == 0) {
+        char c = SRC[POS];
+        POS = POS + 1;
+        if (c == '\n') { LINE = LINE + 1; COL = 0; }
+        else { COL = COL + 1; }
+        k = k + 1;
+    }
+}
+
+// Capture the full current line for diagnostics
+fun capture_current_line(): void {
+    int start = POS - 1;
+    while (start >= 0 && SRC[start] != '\n') { start = start - 1; }
+    start = start + 1;
+    int end = POS;
+    while (end < SRC_LEN && SRC[end] != '\n' && SRC[end] != '\0') { end = end + 1; }
+    CURRENT_TOKEN_LINE = str_sub(SRC, start, end);
+}
+
+// ================
+// ===== I/O  =====
+// ================
+
+// Stub for file reading: replace with your runtime I/O.
+// Must return a null-terminated char[] containing entire file.
+extern fun read_file(path: char[]): char[];
+
+// For error messages (optional)
+extern fun print(s: char[]): void;
+
+fun error(msg: char[]): void {
+    print(msg);
+}
+
+// ==================================
+// ===== Skip whitespace/comments ====
+// ==================================
+fun skip_ws_and_comments(): void {
+    int progressed = 0;
+
+    do {
+        progressed = 0;
+
+        // whitespace
+        while (at_eof() == 0 && is_whitespace(cur()) == 1) {
+            advance(1);
+            progressed = 1;
+        }
+
+        // line comment: //
+        if (at_eof() == 0 && cur() == '/' && peek(1) == '/') {
+            while (at_eof() == 0 && cur() != '\n') { advance(1); }
+            progressed = 1;
+        }
+
+        // block comment: /* ... */
+        if (at_eof() == 0 && cur() == '/' && peek(1) == '*') {
+            advance(2);
+            int closed = 0;
+            while (at_eof() == 0) {
+                if (cur() == '*' && peek(1) == '/') {
+                    advance(2);
+                    closed = 1;
+                    break;
+                }
+                advance(1);
+            }
+            if (closed == 0) {
+                error("ERROR: Unclosed block comment\n");
+                CURRENT_TOKEN = SHC.ERROR;
+                return;
+            }
+            progressed = 1;
+        }
+    } while (progressed == 1 && at_eof() == 0);
+}
+
+// ======================================
+// ===== Literal/identifier scanners =====
+// ======================================
+
+fun scan_string(): void {
+    // assumes cur() == '"'
+    advance(1); // skip opening "
+    char[] buf = ""; // grow by appending chars
+
+    while (1 == 1) {
+        if (at_eof() == 1 || cur() == '\n') {
+            error("ERROR: Unclosed string literal\n");
+            CURRENT_TOKEN = SHC.ERROR;
+            return;
+        }
+        char c = cur();
+        if (c == '"') {
+            advance(1);
+            LATEST_STRING = buf;
+            CURRENT_TOKEN = SHC.STRING_LITERAL;
+            return;
+        }
+        if (c == '\\') {
+            if (peek(1) == '\0') {
+                error("ERROR: Bad escape at EOL in string\n");
+                CURRENT_TOKEN = SHC.ERROR;
+                return;
+            }
+            char e = peek(1);
+            if (e == 'n') { buf = str_append_char(buf, '\n'); advance(2); }
+            else if (e == 't') { buf = str_append_char(buf, '\t'); advance(2); }
+            else if (e == 'r') { buf = str_append_char(buf, '\r'); advance(2); }
+            else if (e == '\\') { buf = str_append_char(buf, '\\'); advance(2); }
+            else if (e == '\'') { buf = str_append_char(buf, '\''); advance(2); }
+            else if (e == '"') { buf = str_append_char(buf, '\"'); advance(2); }
+            else if (e == '0') { buf = str_append_char(buf, '\0'); advance(2); }
+            else {
+                error("ERROR: Unknown string escape\n");
+                CURRENT_TOKEN = SHC.ERROR;
+                return;
+            }
+        } else {
+            buf = str_append_char(buf, c);
+            advance(1);
+        }
+    }
+}
+
+fun scan_char_lit(): void {
+    // assumes cur() == '\''
+    advance(1); // skip opening '
+    if (at_eof() == 1 || cur() == '\n') {
+        error("ERROR: Empty char literal\n");
+        CURRENT_TOKEN = SHC.ERROR;
+        return;
+    }
+    int value = 0;
+    if (cur() == '\\') {
+        if (peek(1) == '\0') {
+            error("ERROR: Bad escape in char\n");
+            CURRENT_TOKEN = SHC.ERROR;
+            return;
+        }
+        char e = peek(1);
+        if (e == 'n') { value = '\n'; advance(2); }
+        else if (e == 't') { value = '\t'; advance(2); }
+        else if (e == 'r') { value = '\r'; advance(2); }
+        else if (e == '\\') { value = '\\'; advance(2); }
+        else if (e == '\'') { value = '\''; advance(2); }
+        else if (e == '"') { value = '\"'; advance(2); }
+        else if (e == '0') { value = '\0'; advance(2); }
+        else {
+            error("ERROR: Unknown char escape\n");
+            CURRENT_TOKEN = SHC.ERROR;
+            return;
+        }
+    } else {
+        value = cur();
+        advance(1);
+    }
+    if (at_eof() == 1 || cur() != '\'') {
+        error("ERROR: Unclosed char literal\n");
+        CURRENT_TOKEN = SHC.ERROR;
+        return;
+    }
+    advance(1); // closing '
+    LATEST_CHAR = value;
+    CURRENT_TOKEN = SHC.CHAR_LITERAL;
+}
+
+fun scan_int_lit(): void {
+    // decimal only; "0" ok; no leading zeros like "012"
+    if (cur() == '0') {
+        advance(1);
+        if (is_digit(cur()) == 1) {
+            error("ERROR: Invalid decimal with leading zero\n");
+            CURRENT_TOKEN = SHC.ERROR;
+            return;
+        }
+        LATEST_INT = 0;
+        CURRENT_TOKEN = SHC.INT_LITERAL;
+        return;
+    }
+    if (!(cur() >= '1' && cur() <= '9')) {
+        error("ERROR: Invalid integer start\n");
+        CURRENT_TOKEN = SHC.ERROR;
+        return;
+    }
+    // Accumulate until non-digit
+    int start = POS;
+    advance(1);
+    while (at_eof() == 0 && is_digit(cur()) == 1) { advance(1); }
+    // Parse value (simple base-10)
+    int i = start;
+    int v = 0;
+    while (i < POS) {
+        v = v * 10 + (SRC[i] - '0');
+        i = i + 1;
+    }
+    LATEST_INT = v;
+    CURRENT_TOKEN = SHC.INT_LITERAL;
+}
+
+fun scan_ident_or_keyword(): void {
+    int start = POS;
+    if (is_ident_start(cur()) == 0) {
+        error("ERROR: Invalid identifier start\n");
+        CURRENT_TOKEN = SHC.ERROR;
+        return;
+    }
+    advance(1);
+    while (at_eof() == 0 && is_ident_part(cur()) == 1) { advance(1); }
+    char[] lex = str_sub(SRC, start, POS);
+
+    // booleans -> BOOL_LITERAL
+    if (str_eq(lex, "true") == 1) {
+        LATEST_INT = 1;
+        CURRENT_TOKEN = SHC.BOOL_LITERAL;
+        return;
+    }
+    if (str_eq(lex, "false") == 1) {
+        LATEST_INT = 0;
+        CURRENT_TOKEN = SHC.BOOL_LITERAL;
+        return;
+    }
+
+    // keywords
+    int k = 0;
+    while (k < 10) { // number of KEYWORDS
+        if (str_eq(lex, KEYWORDS[k]) == 1) {
+            CURRENT_TOKEN = KEYWORD_TOKENS[k];
+            return;
+        }
+        k = k + 1;
+    }
+
+    // identifier
+    LATEST_IDENTIFIER = lex;
+    CURRENT_TOKEN = SHC.ID;
+}
+
+// ===============================
+// ===== Symbol consumption  =====
+// ===============================
+
+fun try_symbol(): int {
+    // Maximal munch: try all, keep longest match
+    int best = 0;
+    SHC found = SHC.ERROR;
+    int i = 0;
+    while (i < 25) { // number of symbols in SYM
+        char[] s = SYM[i];
+        int len = str_len(s);
+        if (str_starts_with_at(SRC, s, POS) == 1) {
+            if (len > best) {
+                best = len;
+                found = SYM_TOK[i];
+            }
+        }
+        i = i + 1;
+    }
+    if (best != 0) {
+        CURRENT_TOKEN = found;
+        advance(best);
+        return 1;
+    }
+    return 0;
+}
+
+// ========================
+// ===== Public API   =====
+// ========================
+
+fun SHCScanner_init(path: char[]): void {
+    SRC = read_file(path);
+    SRC_LEN = str_len(SRC);
+    POS = 0; LINE = 1; COL = 0;
+    CURRENT_TOKEN = SHC.ERROR;
+    LATEST_IDENTIFIER = "";
+    LATEST_INT = 0;
+    LATEST_CHAR = 0;
+    LATEST_STRING = "";
+    CURRENT_TOKEN_LINE = "";
+    nextToken();
+}
+
+fun nextToken(): void {
+    skip_ws_and_comments();
+
+    capture_current_line(); // update diagnostic line for this token
+
+    if (at_eof() == 1) {
+        CURRENT_TOKEN = SHC.EOS;
+        return;
+    }
+
+    // Try symbol first (maximal munch)
+    if (try_symbol() == 1) {
+        return;
+    }
+
+    char c = cur();
+    if (c == '"') {
+        scan_string();
+        return;
+    } else if (c == '\'') {
+        scan_char_lit();
+        return;
+    } else if (is_digit(c) == 1) {
+        scan_int_lit();
+        return;
+    } else if (is_ident_start(c) == 1) {
+        scan_ident_or_keyword();
+        return;
+    } else {
+        error("ERROR: Unexpected character\n");
+        CURRENT_TOKEN = SHC.ERROR;
+        return;
+    }
+}
+
+// Mirror the Java getters
+fun currentToken(): SHC { return CURRENT_TOKEN; }
+fun getId(): char[] { return LATEST_IDENTIFIER; }
+fun getInt(): int { return LATEST_INT; }          // also for BOOL_LITERAL (1/0)
+fun getChar(): int { return LATEST_CHAR; }
+fun getString(): char[] { return LATEST_STRING; }
+fun getCurrentTokenLine(): char[] { return CURRENT_TOKEN_LINE; }
+fun getLineIdx(): int { return LINE; }
+fun getCharIdx(): int { return COL; }
+
+// Optional: debug printer for current token (similar to Java)
+fun currentTokenString(): char[] {
+    // Minimal implementation; adapt if you have formatting helpers.
+    // For quick debugging, prefer printing fields individually.
+    return ""; // implement if you have formatting utilities
+}
