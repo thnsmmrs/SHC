@@ -147,15 +147,13 @@ public final class Parser {
         || t == SHC.INT_LITERAL || t == SHC.CHAR_LITERAL || t == SHC.STRING_LITERAL || t == SHC.TRUE || t == SHC.FALSE;
   }
 
-  private Variable getVariableByName(ArrayList<Variable> localVariables, String name) {
+  private Variable getVariableByName(ArrayList<Variable> localVariables, String name, int line, int col) {
     for (Variable variable : localVariables) {
       if (variable.getName().equals(name)) {
         return variable;
       }
     }
-    // TODO - make better error statement
-    System.out.println("ERROR: Variable not found" + name);
-    System.exit(1);
+    error("Variable '" + name + "' not found", line, col);
     return null;
   }
 
@@ -234,7 +232,7 @@ public final class Parser {
             sc.nextToken();
             OrExpression rhs = parseOrBase(localVariables);
             expect(SHC.SEMICOLON, ";");
-            Variable v = getVariableByName(localVariables, firstName);
+            Variable v = getVariableByName(localVariables, firstName, line, col);
             Factor.Var lhs = new Factor.Var(v, 0, line, col);
             Assignment asg = new Assignment(lhs, rhs, line, col);
             return new Statement.Assign(asg, line, col);
@@ -257,7 +255,7 @@ public final class Parser {
           expect(SHC.ASSIGN, "=");
           OrExpression rhs = parseOrBase(localVariables);
           expect(SHC.SEMICOLON, ";");
-          Variable v = getVariableByName(localVariables, name);
+          Variable v = getVariableByName(localVariables, name, line, col);
           Factor.Var lhs = new Factor.Var(v, hats, line, col);
           Assignment asg = new Assignment(lhs, rhs, line, col);
           return new Statement.Assign(asg, line, col);
@@ -450,7 +448,7 @@ public final class Parser {
           Function callee = new Function(SHC.VOID, id, new Variable[0], new Variable[0], new Statement[0], line, col);
           return new Factor.Call(callee, args.toArray(Expression[]::new), line, col);
         } else {
-          Variable v = getVariableByName(localVariables, id);
+          Variable v = getVariableByName(localVariables, id, line, col);
           return new Factor.Var(v, depth, line, col);
         }
       }
