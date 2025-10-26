@@ -107,7 +107,7 @@ public class Compiler {
       compileStatement(statement, 1);
     }
 
-    output("}");
+    output("}\n");
   }
 
   /**
@@ -155,7 +155,8 @@ public class Compiler {
     for (Statement subStatement : statement.body()) {
       compileStatement(subStatement, nTabs + 1);
     }
-    if (statement.otherBody() == null) {
+    // Only generate else block if it has statements
+    if (statement.otherBody() == null || statement.otherBody().length == 0) {
       output("}\n", nTabs);
     } else {
       output("} else {\n", nTabs);
@@ -371,7 +372,7 @@ public class Compiler {
       var left = expression.getLeft();
       compileMultiplicativeExpression(left);
       var op = expression.getOperator();
-      output(op == SHC.MULTIPLY ? "*" : op == SHC.DIVIDE ? "/" : "%");
+      output(op == SHC.MULTIPLY ? " * " : op == SHC.DIVIDE ? " / " : " % ");
     }
     var right = expression.getRight();
     compileUnaryExpression(right);
