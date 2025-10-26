@@ -56,7 +56,7 @@ public class Compiler {
     }
 
     output("#include <stdio.h>\n");
-    output("#include <stdlib.h>\n\n");
+    output("#include <stdlib.h>\n");
     output("#include <stdint.h>\n\n");
     for (Function function : program) {
       compileFunction(function);
@@ -69,19 +69,24 @@ public class Compiler {
    * @param function - function to compile
    */
   public static void compileFunction(Function function) {
-    switch (function.getReturnType()) {
-      case VOID:
-        output("void ");
-        break;
-      case CHAR:
-        output("uint8_t ");
-        break;
-      case INT:
-        output("uint64_t ");
-        break;
-      default:
-        reporter.printError("bad function return type");
-        System.exit(1);
+    // Special case: main() should return int for C standards compliance
+    if (function.getName().equals("main") && function.getReturnType() == SHC.INT) {
+      output("int ");
+    } else {
+      switch (function.getReturnType()) {
+        case VOID:
+          output("void ");
+          break;
+        case CHAR:
+          output("uint8_t ");
+          break;
+        case INT:
+          output("uint64_t ");
+          break;
+        default:
+          reporter.printError("bad function return type");
+          System.exit(1);
+      }
     }
 
     for (int i = 0; i < function.getNReturnReferences(); i++) {
@@ -102,7 +107,7 @@ public class Compiler {
       compileStatement(statement, 1);
     }
 
-    output("}");
+    output("}\n");
   }
 
   /**
@@ -150,7 +155,8 @@ public class Compiler {
     for (Statement subStatement : statement.body()) {
       compileStatement(subStatement, nTabs + 1);
     }
-    if (statement.otherBody() == null) {
+    // Only generate else block if it has statements
+    if (statement.otherBody() == null || statement.otherBody().length == 0) {
       output("}\n", nTabs);
     } else {
       output("} else {\n", nTabs);
@@ -366,7 +372,7 @@ public class Compiler {
       var left = expression.getLeft();
       compileMultiplicativeExpression(left);
       var op = expression.getOperator();
-      output(op == SHC.MULTIPLY ? "*" : op == SHC.DIVIDE ? "/" : "%");
+      output(op == SHC.MULTIPLY ? " * " : op == SHC.DIVIDE ? " / " : " % ");
     }
     var right = expression.getRight();
     compileUnaryExpression(right);
