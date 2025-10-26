@@ -1,0 +1,286 @@
+/**
+ * Parser for SHC language - builds AST from tokens.
+ * Part of the self-hosted SHC compiler (Compiler 2).
+ *
+ * @author SHC Compiler Team
+ */
+
+/* ============================================================================
+ * NODE TYPE CONSTANTS
+ * ============================================================================ */
+
+/* Statement node types */
+fun NODE_STMT_IF() : int { return 1; }
+fun NODE_STMT_WHILE() : int { return 2; }
+fun NODE_STMT_RETURN() : int { return 3; }
+fun NODE_STMT_BREAK() : int { return 4; }
+fun NODE_STMT_CONTINUE() : int { return 5; }
+fun NODE_STMT_DECL() : int { return 6; }
+fun NODE_STMT_ASSIGN() : int { return 7; }
+fun NODE_STMT_CALL() : int { return 8; }
+fun NODE_STMT_BLOCK() : int { return 9; }
+
+/* Expression node types */
+fun NODE_EXPR_BINARY() : int { return 20; }
+fun NODE_EXPR_UNARY() : int { return 21; }
+fun NODE_EXPR_LITERAL() : int { return 22; }
+fun NODE_EXPR_VAR() : int { return 23; }
+fun NODE_EXPR_CALL() : int { return 24; }
+fun NODE_EXPR_PAREN() : int { return 25; }
+
+/* Other node types */
+fun NODE_FUNCTION() : int { return 40; }
+fun NODE_VARIABLE() : int { return 41; }
+fun NODE_PARAM() : int { return 42; }
+
+/* ============================================================================
+ * NODE STRUCTURE SIZES (in bytes)
+ * ============================================================================ */
+
+/* Memory layout for nodes:
+ * All nodes start with: [type:int][line:int][col:int]
+ *
+ * Statement (if): [type][line][col][cond_ptr][then_ptr][then_count][else_ptr][else_count]
+ * Statement (while): [type][line][col][cond_ptr][body_ptr][body_count]
+ * Statement (return): [type][line][col][has_value][value_ptr]
+ * Statement (decl): [type][line][col][var_ptr]
+ * Statement (assign): [type][line][col][lhs_ptr][rhs_ptr]
+ * Statement (call): [type][line][col][name_ptr][args_ptr][arg_count]
+ *
+ * Expression (binary): [type][line][col][operator][left_ptr][right_ptr]
+ * Expression (unary): [type][line][col][operator][operand_ptr]
+ * Expression (literal): [type][line][col][value_type][int_value]
+ * Expression (var): [type][line][col][name_ptr][deref_count]
+ * Expression (call): [type][line][col][name_ptr][args_ptr][arg_count]
+ *
+ * Function: [type][line][col][ret_type][ret_stars][name_ptr][params_ptr][param_count][body_ptr][body_count]
+ * Variable: [type][line][col][base_type][stars][name_ptr]
+ */
+
+fun STMT_BASE_SIZE() : int { return 12; }    // type + line + col
+fun STMT_IF_SIZE() : int { return 44; }
+fun STMT_WHILE_SIZE() : int { return 32; }
+fun STMT_RETURN_SIZE() : int { return 24; }
+fun STMT_SIMPLE_SIZE() : int { return 12; }  // break/continue
+fun STMT_DECL_SIZE() : int { return 20; }
+fun STMT_ASSIGN_SIZE() : int { return 28; }
+fun STMT_CALL_SIZE() : int { return 36; }
+
+fun EXPR_BINARY_SIZE() : int { return 32; }
+fun EXPR_UNARY_SIZE() : int { return 24; }
+fun EXPR_LITERAL_SIZE() : int { return 24; }
+fun EXPR_VAR_SIZE() : int { return 28; }
+fun EXPR_CALL_SIZE() : int { return 36; }
+
+fun FUNCTION_SIZE() : int { return 56; }
+fun VARIABLE_SIZE() : int { return 28; }
+
+/* ============================================================================
+ * GLOBAL PARSER STATE
+ * ============================================================================ */
+
+/* Scanner integration state */
+parser_current_token : int;
+parser_token_value : ^char;
+parser_token_int : int;
+parser_token_line : int;
+parser_token_col : int;
+
+/* Parser state */
+parser_functions : ^^int;          // array of function node pointers
+parser_function_count : int;
+parser_function_capacity : int;
+
+parser_local_vars : ^^int;         // array of variable node pointers
+parser_local_var_count : int;
+parser_local_var_capacity : int;
+
+parser_error_count : int;
+
+/* ============================================================================
+ * SCANNER INTEGRATION (assumes scanner.shc is linked)
+ * ============================================================================ */
+
+/**
+ * Advance to next token and update parser state.
+ */
+fun parserNextToken() : void {
+    nextToken();  // from scanner.shc
+    parser_current_token = getCurrentToken();
+    parser_token_value = getTokenValue();
+    parser_token_int = getTokenInt();
+    parser_token_line = getLineNumber();
+    parser_token_col = getCharPosition();
+}
+
+/**
+ * Initialize parser with source code.
+ * @param buffer - source code as string
+ */
+fun initParser(buffer : ^char) : void {
+    // Initialize scanner
+    initScanner(buffer);
+
+    // Initialize parser state
+    parser_function_capacity = 16;
+    parser_functions = malloc(parser_function_capacity * 8);  // array of pointers
+    parser_function_count = 0;
+
+    parser_local_var_capacity = 64;
+    parser_local_vars = malloc(parser_local_var_capacity * 8);
+    parser_local_var_count = 0;
+
+    parser_error_count = 0;
+
+    // Get first token
+    parserNextToken();
+}
+
+/* ============================================================================
+ * PARSER HELPER FUNCTIONS
+ * ============================================================================ */
+
+/**
+ * Check if current token matches expected type.
+ * @param expected - token type to match
+ * @return 1 if match, 0 otherwise
+ */
+fun match(expected : int) : int {
+    return parser_current_token == expected;
+}
+
+/**
+ * Consume current token if it matches expected type.
+ * @param expected - token type to match
+ * @return 1 if consumed, 0 otherwise
+ */
+fun consume(expected : int) : int {
+    if (match(expected)) {
+        parserNextToken();
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * Expect a specific token, error if not found.
+ * @param expected - token type to expect
+ * @param msg - error message
+ */
+fun expect(expected : int, msg : ^char) : void {
+    if (parser_current_token != expected) {
+        printError(msg, parser_token_line, parser_token_col);
+        parser_error_count = parser_error_count + 1;
+        return;
+    }
+    parserNextToken();
+}
+
+/**
+ * Expect an identifier token.
+ * @return pointer to identifier string (or null on error)
+ */
+fun expectId() : ^char {
+    if (parser_current_token != TOKEN_ID()) {
+        printError("Expected identifier", parser_token_line, parser_token_col);
+        parser_error_count = parser_error_count + 1;
+        return malloc(1);  // empty string
+    }
+    result : ^char;
+    result = parser_token_value;
+    parserNextToken();
+    return result;
+}
+
+/**
+ * Print parser error message.
+ * @param msg - error message
+ * @param line - line number
+ * @param col - column number
+ */
+fun printError(msg : ^char, line : int, col : int) : void {
+    puts("ERROR: ");
+    puts(msg);
+    puts(" at line ");
+    // TODO: print line and col numbers
+    puts("\n");
+}
+
+/* ============================================================================
+ * NODE ALLOCATION FUNCTIONS
+ * ============================================================================ */
+
+/**
+ * Allocate and initialize a statement node.
+ * @param type - statement node type
+ * @param size - size in bytes
+ * @return pointer to allocated node
+ */
+fun allocStatement(type : int, size : int) : ^int {
+    node : ^int;
+    node = malloc(size);
+    ^node = type;                           // node type
+    ^(node + 1) = parser_token_line;       // line
+    ^(node + 2) = parser_token_col;        // col
+    return node;
+}
+
+/**
+ * Allocate and initialize an expression node.
+ * @param type - expression node type
+ * @param size - size in bytes
+ * @return pointer to allocated node
+ */
+fun allocExpression(type : int, size : int) : ^int {
+    node : ^int;
+    node = malloc(size);
+    ^node = type;
+    ^(node + 1) = parser_token_line;
+    ^(node + 2) = parser_token_col;
+    return node;
+}
+
+/**
+ * Allocate a function node.
+ * @return pointer to allocated function node
+ */
+fun allocFunction() : ^int {
+    return allocStatement(NODE_FUNCTION(), FUNCTION_SIZE());
+}
+
+/**
+ * Allocate a variable node.
+ * @return pointer to allocated variable node
+ */
+fun allocVariable() : ^int {
+    node : ^int;
+    node = malloc(VARIABLE_SIZE());
+    ^node = NODE_VARIABLE();
+    ^(node + 1) = parser_token_line;
+    ^(node + 2) = parser_token_col;
+    return node;
+}
+
+/* ============================================================================
+ * NODE ACCESSOR FUNCTIONS (getters/setters)
+ * ============================================================================
+ *
+ * These will be implemented incrementally as we build the parser.
+ * For now, we have the foundation.
+ */
+
+/* TO BE CONTINUED... */
+
+/**
+ * Main parser entry point.
+ * @param source - source code string
+ * @return number of functions parsed (0 if error)
+ */
+fun parseProgram(source : ^char) : int {
+    initParser(source);
+
+    // TODO: implement program parsing
+    // For now, just a placeholder
+
+    return parser_function_count;
+}

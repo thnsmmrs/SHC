@@ -3,6 +3,7 @@ import java.util.ArrayList;
 public final class Parser {
   private final SHCScanner sc;
   private final Reporter rep;
+  private final ArrayList<Variable> globalVariables = new ArrayList<>();
 
   public Parser(String filename) {
     this.sc = new SHCScanner(filename);
@@ -18,8 +19,11 @@ public final class Parser {
     while (sc.currentToken() != SHC.EOS) {
       if (sc.currentToken() == SHC.FUN) {
         funs.add(parseFunction());
+      } else if (sc.currentToken() == SHC.ID) {
+        // Top-level global declaration: name : type;
+        parseTopLevelDeclLine();
       } else {
-        error("Expected 'fun', found " + sc.currentTokenString(),
+        error("Expected 'fun' or declaration, found " + sc.currentTokenString(),
             sc.getLineIdx(), sc.getCharIdx());
       }
     }
@@ -38,7 +42,8 @@ public final class Parser {
     Variable[] params = parseParamList(); // name : type
     expect(SHC.RPAREN, ")");
 
-    // Add parameters to local variables so they can be referenced in function body
+    // Add globals and parameters to local variables so they can be referenced in function body
+    localVariables.addAll(globalVariables);
     for (Variable param : params) {
       localVariables.add(param);
     }
@@ -63,6 +68,12 @@ public final class Parser {
 
     // include pointer depth on return type
     return new Function(retBase, retStars, name, params, new Variable[0], body, line, col);
+  }
+
+  // Top-level global declaration: name : type;
+  private void parseTopLevelDeclLine() {
+    String name = expectId("global variable name");
+    parseDeclLineStartingWith(globalVariables, name);
   }
 
   // ===================== types (name : ^*base) =====================
