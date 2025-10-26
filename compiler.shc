@@ -1,0 +1,561 @@
+// code generator - converts AST to C
+// @author SWY
+
+// globals for output
+output_buffer : ^char;
+output_pos : int;
+output_capacity : int;
+current_indent : int;
+
+// init output buf
+fun initOutputBuffer() : void {
+    output_capacity = 16384;
+    output_buffer = malloc(output_capacity);
+    output_pos = 0;
+    current_indent = 0;
+}
+
+// add char to buffer
+fun appendChar(c : char) : void {
+    temp : ^char;
+
+    // grow buffer if needed
+    if (output_pos >= output_capacity - 1) {
+        output_capacity = output_capacity * 2;
+        // TODO fix this later lol
+    }
+
+    temp = output_buffer + output_pos;
+    ^temp = c;
+    output_pos = output_pos + 1;
+}
+
+// append string
+fun appendString(s : ^char) : void {
+    i : int;
+    c : char;
+    temp : ^char;
+
+    i = 0;
+    while (1) {
+        temp = s + i;
+        c = ^temp;
+        if (c == 0) {
+            break;
+        }
+        appendChar(c);
+        i = i + 1;
+    }
+}
+
+// convert int to string
+fun appendInt(n : int) : void {
+    // negatives
+    if (n < 0) {
+        appendChar('-');
+        n = 0 - n;
+    }
+
+    // zero case
+    if (n == 0) {
+        appendChar('0');
+        return;
+    }
+
+    // recursive
+    if (n >= 10) {
+        appendInt(n / 10);
+    }
+    appendChar('0' + (n % 10));
+}
+
+// add indentation
+fun appendIndent() : void {
+    i : int;
+    j : int;
+    i = 0;
+    while (i < current_indent) {
+        j = 0;
+        while (j < 4) {
+            appendChar(' ');
+            j = j + 1;
+        }
+        i = i + 1;
+    }
+}
+
+fun indent() : void {
+    current_indent = current_indent + 1;
+}
+
+fun dedent() : void {
+    current_indent = current_indent - 1;
+}
+
+// write buffer to stdout
+fun flushBuffer() : void {
+    temp : ^char;
+    temp = output_buffer + output_pos;
+    ^temp = 0;
+    puts(output_buffer);
+}
+
+// compile type spec to C
+fun compileType(baseType : int, stars : int) : void {
+    i : int;
+
+    // base type
+    if (baseType == TOKEN_INT()) {
+        appendString("uint64_t");
+    } else if (baseType == TOKEN_CHAR()) {
+        appendString("uint8_t");
+    } else if (baseType == TOKEN_VOID()) {
+        appendString("void");
+    }
+
+    // pointer stars
+    i = 0;
+    while (i < stars) {
+        appendString(" *");
+        i = i + 1;
+    }
+}
+
+// main entry - compile all functions
+fun compile(functions : ^^int, functionCount : int) : void {
+    i : int;
+    funcNode : ^int;
+    temp : ^^int;
+
+    initOutputBuffer();
+
+    // headers
+    appendString("#include <stdio.h>\n");
+    appendString("#include <stdlib.h>\n");
+    appendString("#include <stdint.h>\n\n");
+
+    // compile funcs
+    i = 0;
+    while (i < functionCount) {
+        temp = functions + i;
+        funcNode = ^temp;
+        compileFunction(funcNode);
+        appendChar('\n');
+        i = i + 1;
+    }
+
+    flushBuffer();
+}
+
+// compile literal expr
+fun compileLiteral(expr : ^int) : void {
+    litType : int;
+    value : int;
+
+    litType = getLiteralType(expr);
+    value = getLiteralValue(expr);
+
+    if (litType == TOKEN_INT_LITERAL()) {
+        appendInt(value);
+    } else if (litType == TOKEN_CHAR_LITERAL()) {
+        appendChar('\'');
+        appendChar(value);
+        appendChar('\'');
+    } else {
+        // TODO strings
+        appendString("\"str\"");
+    }
+}
+
+// compile var reference
+fun compileVarExpr(expr : ^int) : void {
+    name : ^char;
+    name = getVarName(expr);
+    appendString(name);
+}
+
+// compile binary op
+fun compileBinaryExpr(expr : ^int) : void {
+    op : int;
+    left : ^int;
+    right : ^int;
+
+    op = getBinaryOp(expr);
+    left = getBinaryLeft(expr);
+    right = getBinaryRight(expr);
+
+    appendChar('(');
+    compileExpression(left);
+    appendChar(' ');
+
+    // operator
+    if (op == TOKEN_ADD()) {
+        appendChar('+');
+    } else if (op == TOKEN_SUBTRACT()) {
+        appendChar('-');
+    } else if (op == TOKEN_MULTIPLY()) {
+        appendChar('*');
+    } else if (op == TOKEN_DIVIDE()) {
+        appendChar('/');
+    } else if (op == TOKEN_MOD()) {
+        appendChar('%');
+    } else if (op == TOKEN_EQUAL()) {
+        appendString("==");
+    } else if (op == TOKEN_NEQ()) {
+        appendString("!=");
+    } else if (op == TOKEN_LESS()) {
+        appendChar('<');
+    } else if (op == TOKEN_GREATER()) {
+        appendChar('>');
+    } else if (op == TOKEN_LEQ()) {
+        appendString("<=");
+    } else if (op == TOKEN_GEQ()) {
+        appendString(">=");
+    } else if (op == TOKEN_AND()) {
+        appendString("&&");
+    } else if (op == TOKEN_OR()) {
+        appendString("||");
+    }
+
+    appendChar(' ');
+    compileExpression(right);
+    appendChar(')');
+}
+
+// compile unary op
+fun compileUnaryExpr(expr : ^int) : void {
+    op : int;
+    operand : ^int;
+
+    op = getUnaryOp(expr);
+    operand = getUnaryOperand(expr);
+
+    appendChar('(');
+
+    if (op == TOKEN_NOT()) {
+        appendChar('!');
+    } else if (op == TOKEN_SUBTRACT()) {
+        appendChar('-');
+    } else if (op == TOKEN_AMP()) {
+        appendChar('&');
+    } else if (op == TOKEN_MULTIPLY()) {
+        appendChar('*');
+    }
+
+    compileExpression(operand);
+    appendChar(')');
+}
+
+// compile function call
+fun compileCallExpr(expr : ^int) : void {
+    name : ^char;
+    args : ^^int;
+    argCount : int;
+    i : int;
+    temp : ^^int;
+    arg : ^int;
+
+    name = getCallName(expr);
+    args = getCallArgs(expr);
+    argCount = getCallArgCount(expr);
+
+    appendString(name);
+    appendChar('(');
+
+    i = 0;
+    while (i < argCount) {
+        temp = args + i;
+        arg = ^temp;
+        compileExpression(arg);
+
+        if (i < argCount - 1) {
+            appendString(", ");
+        }
+        i = i + 1;
+    }
+
+    appendChar(')');
+}
+
+// dispatch expressions
+fun compileExpression(expr : ^int) : void {
+    nodeType : int;
+
+    nodeType = getNodeType(expr);
+
+    if (nodeType == NODE_EXPR_LITERAL()) {
+        compileLiteral(expr);
+    } else if (nodeType == NODE_EXPR_VAR()) {
+        compileVarExpr(expr);
+    } else if (nodeType == NODE_EXPR_BINARY()) {
+        compileBinaryExpr(expr);
+    } else if (nodeType == NODE_EXPR_UNARY()) {
+        compileUnaryExpr(expr);
+    } else if (nodeType == NODE_EXPR_CALL()) {
+        compileCallExpr(expr);
+    }
+}
+
+// return stmt
+fun compileReturn(stmt : ^int) : void {
+    hasValue : int;
+    value : ^int;
+
+    appendIndent();
+    appendString("return");
+
+    hasValue = getReturnHasValue(stmt);
+    if (hasValue) {
+        appendChar(' ');
+        value = getReturnValue(stmt);
+        compileExpression(value);
+    }
+
+    appendString(";\n");
+}
+
+fun compileBreak() : void {
+    appendIndent();
+    appendString("break;\n");
+}
+
+fun compileContinue() : void {
+    appendIndent();
+    appendString("continue;\n");
+}
+
+// var declaration
+fun compileDeclaration(stmt : ^int) : void {
+    varNode : ^int;
+    baseType : int;
+    stars : int;
+    name : ^char;
+
+    varNode = getDeclVariable(stmt);
+    baseType = getVariableBaseType(varNode);
+    stars = getVariableStars(varNode);
+    name = getVariableName(varNode);
+
+    appendIndent();
+    compileType(baseType, stars);
+    appendChar(' ');
+    appendString(name);
+    appendString(";\n");
+}
+
+// assignment
+fun compileAssignment(stmt : ^int) : void {
+    lhs : ^int;
+    rhs : ^int;
+
+    lhs = getAssignLhs(stmt);
+    rhs = getAssignRhs(stmt);
+
+    appendIndent();
+    compileExpression(lhs);
+    appendString(" = ");
+    compileExpression(rhs);
+    appendString(";\n");
+}
+
+// function call stmt
+fun compileCallStmt(stmt : ^int) : void {
+    name : ^char;
+    args : ^^int;
+    argCount : int;
+    i : int;
+    temp : ^^int;
+    arg : ^int;
+
+    name = getStmtCallName(stmt);
+    args = getStmtCallArgs(stmt);
+    argCount = getStmtCallArgCount(stmt);
+
+    appendIndent();
+    appendString(name);
+    appendChar('(');
+
+    i = 0;
+    while (i < argCount) {
+        temp = args + i;
+        arg = ^temp;
+        compileExpression(arg);
+
+        if (i < argCount - 1) {
+            appendString(", ");
+        }
+        i = i + 1;
+    }
+
+    appendString(");\n");
+}
+
+// if/else stmt
+fun compileIf(stmt : ^int) : void {
+    cond : ^int;
+    thenBlock : ^^int;
+    thenCount : int;
+    elseBlock : ^^int;
+    elseCount : int;
+
+    cond = getIfCondition(stmt);
+    thenBlock = getIfThen(stmt);
+    thenCount = getIfThenCount(stmt);
+    elseBlock = getIfElse(stmt);
+    elseCount = getIfElseCount(stmt);
+
+    appendIndent();
+    appendString("if (");
+    compileExpression(cond);
+    appendString(") {\n");
+
+    indent();
+    compileStatementBlock(thenBlock, thenCount);
+    dedent();
+
+    if (elseCount > 0) {
+        appendIndent();
+        appendString("} else {\n");
+        indent();
+        compileStatementBlock(elseBlock, elseCount);
+        dedent();
+    }
+
+    appendIndent();
+    appendString("}\n");
+}
+
+// while loop
+fun compileWhile(stmt : ^int) : void {
+    cond : ^int;
+    body : ^^int;
+    bodyCount : int;
+
+    cond = getWhileCondition(stmt);
+    body = getWhileBody(stmt);
+    bodyCount = getWhileBodyCount(stmt);
+
+    appendIndent();
+    appendString("while (");
+    compileExpression(cond);
+    appendString(") {\n");
+
+    indent();
+    compileStatementBlock(body, bodyCount);
+    dedent();
+
+    appendIndent();
+    appendString("}\n");
+}
+
+// dispatch statements
+fun compileStatement(stmt : ^int) : void {
+    nodeType : int;
+
+    nodeType = getNodeType(stmt);
+
+    if (nodeType == NODE_STMT_RETURN()) {
+        compileReturn(stmt);
+    } else if (nodeType == NODE_STMT_BREAK()) {
+        compileBreak();
+    } else if (nodeType == NODE_STMT_CONTINUE()) {
+        compileContinue();
+    } else if (nodeType == NODE_STMT_DECL()) {
+        compileDeclaration(stmt);
+    } else if (nodeType == NODE_STMT_ASSIGN()) {
+        compileAssignment(stmt);
+    } else if (nodeType == NODE_STMT_CALL()) {
+        compileCallStmt(stmt);
+    } else if (nodeType == NODE_STMT_IF()) {
+        compileIf(stmt);
+    } else if (nodeType == NODE_STMT_WHILE()) {
+        compileWhile(stmt);
+    }
+}
+
+// compile block of stmts
+fun compileStatementBlock(stmts : ^^int, count : int) : void {
+    i : int;
+    temp : ^^int;
+    stmt : ^int;
+
+    i = 0;
+    while (i < count) {
+        temp = stmts + i;
+        stmt = ^temp;
+        compileStatement(stmt);
+        i = i + 1;
+    }
+}
+
+// compile function def
+fun compileFunction(funcNode : ^int) : void {
+    retType : int;
+    retStars : int;
+    name : ^char;
+    params : ^^int;
+    paramCount : int;
+    body : ^^int;
+    bodyCount : int;
+    i : int;
+    temp : ^^int;
+    param : ^int;
+    paramType : int;
+    paramStars : int;
+    paramName : ^char;
+
+    retType = getFunctionRetType(funcNode);
+    retStars = getFunctionRetStars(funcNode);
+    name = getFunctionName(funcNode);
+    params = getFunctionParams(funcNode);
+    paramCount = getFunctionParamCount(funcNode);
+    body = getFunctionBody(funcNode);
+    bodyCount = getFunctionBodyCount(funcNode);
+
+    // hack for main()
+    if (retType == TOKEN_INT() && retStars == 0) {
+        temp_name : ^char;
+        temp_name = name;
+        if (^temp_name == 'm') {
+            appendString("int ");
+        } else {
+            compileType(retType, retStars);
+            appendChar(' ');
+        }
+    } else {
+        compileType(retType, retStars);
+        appendChar(' ');
+    }
+
+    appendString(name);
+    appendChar('(');
+
+    // params
+    i = 0;
+    while (i < paramCount) {
+        temp = params + i;
+        param = ^temp;
+
+        paramType = getVariableBaseType(param);
+        paramStars = getVariableStars(param);
+        paramName = getVariableName(param);
+
+        compileType(paramType, paramStars);
+        appendChar(' ');
+        appendString(paramName);
+
+        if (i < paramCount - 1) {
+            appendString(", ");
+        }
+        i = i + 1;
+    }
+
+    appendString(") {\n");
+
+    // body
+    indent();
+    compileStatementBlock(body, bodyCount);
+    dedent();
+
+    appendString("}\n");
+}
