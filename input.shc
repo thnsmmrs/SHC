@@ -2,16 +2,15 @@ fun main(): int {
   len: int;
   len = 100;
   buf: ^char;
-  ^buf = malloc(len);
+  ^buf = malloc(len + 1);
   val: ^char;
   ^val = ^buf;
-  i: int;
-  i = 0;
-  while (i < len) {
-    ^val = ^val + 1;
+
+  while (^val < ^buf + len) {
     val = 'A';
-    i = i + 1;
+    ^val = ^val + 1;
   }
+  val = 0; // terminate string
 
   puts(^buf);
   free(^buf);

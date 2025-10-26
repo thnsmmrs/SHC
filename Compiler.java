@@ -56,6 +56,7 @@ public class Compiler {
     }
 
     output("#include <stdio.h>\n");
+    output("#include <stdlib.h>\n\n");
     output("#include <stdint.h>\n\n");
     for (Function function : program) {
       compileFunction(function);
