@@ -1,66 +1,44 @@
 /**
  * Assignment class for SHC language.
  *
- * @author Alec Kingsley
+ * LHS is a Factor.Var (so it can carry the caret count), RHS is an OrExpression.
  */
 public final class Assignment extends Parsable {
-	/** thing to assign to */
-  private Variable assignee = null;
-  /** value to assign with */
-  private OrExpression value;
-  
-	/**
-	 * Constructor for the {@code Assignment} class.
-	 *
-	 * @param assignee - the thing whose value is being changed
-	 * @param value - the value of the expression
-	 * @param lineIdx - index of the line {@code Parsable} starts at
-	 * @param charIdx - char index in the line {@code Parsable} starts at
-	 */
-	public Assignment(Variable assignee, OrExpression value, int lineIdx, int charIdx) {
-		super(lineIdx, charIdx);
-		this.assignee = assignee;
-		this.value = value;
-	}
+    /** thing to assign to (with its leading ^ count) */
+    private Factor.Var assignee;
 
-	/**
-	 * Constructor for the {@code Assignment} class.
-	 *
-	 * @param value - the value of the expression
-	 * @param lineIdx - index of the line {@code Parsable} starts at
-	 * @param charIdx - char index in the line {@code Parsable} starts at
-	 */
-	public Assignment(OrExpression value, int lineIdx, int charIdx) {
-		super(lineIdx, charIdx);
-		this.value = value;
-	}
+    /** value to assign with */
+    private OrExpression value;
 
-	/** getter method for {@code assignee} */
-	public Variable getAssignee() {
-		if (assignee == null) {
-			throw new RuntimeException("assignment assignee not defined");
-		}
-		return assignee;
-	}
+    /**
+     * Constructor for the {@code Assignment} class.
+     *
+     * @param assignee - the thing whose value is being changed (Factor.Var)
+     * @param value - the value of the expression (OrExpression)
+     * @param lineIdx - index of the line {@code Parsable} starts at
+     * @param charIdx - char index in the line {@code Parsable} starts at
+     */
+    public Assignment(Factor.Var assignee, OrExpression value, int lineIdx, int charIdx) {
+        super(lineIdx, charIdx);
+        this.assignee = assignee;
+        this.value = value;
+    }
 
-	/**
-	 * Return true iff {@code this} has assignee.
-	 */
-	public boolean hasAssignee() {
-		return assignee != null;
-	}
+    /** Getter for assignee */
+    public Factor.Var getAssignee() {
+        if (assignee == null) {
+            throw new RuntimeException("assignment assignee not defined");
+        }
+        return assignee;
+    }
 
-	/** getter method for {@code value} */
-  public OrExpression getValue() {
-  	return value;
-  }
+    /** Does this assignment have an LHS? */
+    public boolean hasAssignee() {
+        return assignee != null;
+    }
 
-	@Override
-	public String toString() {
-		if (hasAssignee()) {
-			return assignee.toString() + " = " + value.toString();
-		} else {
-			return value.toString();
-		}
-	}
+    /** Getter for RHS value */
+    public OrExpression getValue() {
+        return value;
+    }
 }

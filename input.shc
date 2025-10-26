@@ -1,0 +1,14 @@
+fun main(): int {
+  len : int = 100;
+  buf : ^char = malloc(len);
+  val : ^char = ^buf;
+  i: int = 0;
+  while (i < len) {
+    ^val = ^val + 1;
+    val = 'A';
+    i = i + 1;
+  }
+  print(^buf);
+
+  return 0;
+}

@@ -33,7 +33,7 @@ enum SHC {
     GEQ,        // ">="
 
     // Unary-only operator (address-of)
-    AMP,        // "&"   (unary address-of only; NOT bitwise and)
+    CARET,        // "^"   (unary address-of only; NOT bitwise and)
 
     // Punctuation
     COLON,      // ":"

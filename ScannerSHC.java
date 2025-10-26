@@ -8,7 +8,7 @@ class SHCScanner{
     //Error message color formatting
 
     private java.util.Scanner input;
-    //Main scanner
+    //Main.java scanner
 
     private String currentLine = "";
     private String currentTokenLine="";
@@ -40,24 +40,22 @@ class SHCScanner{
         SHC.CONTINUE, SHC.VOID, SHC.INT, SHC.CHAR, SHC.TRUE, SHC.FALSE
 	};
 
-	//Symbols as defined in SHC
-	private static final String[] SYMBOLS = { 
-        "==", "!=", "<=", ">=", "&&", "||",   // two char
-        "+", "-", "*", "/", "%",             // arithmetic
-        "=", "<", ">", "!", "&",             // assign / compare / unary
-        "(", ")", "[", "]", "{", "}",        // brackets
-        ",", ";", ":"
-		
-	};
+    // two-char first, always
+    private static final String[] SYMBOLS = {
+            "==", "!=", "<=", ">=", "&&", "||",          // 0..5
+            "+", "-", "*", "/", "%",                     // 6..10
+            "=", "<", ">", "!", "&", "^",                // 11..16
+            "(", ")", "[", "]", "{", "}",                // 17..22
+            ",", ";", ":"                                // 23..25
+    };
 
-	//SHC Symbol tokens
-	private static final SHC[] SYMBOL_TOKENS = {
-        SHC.EQUAL, SHC.NEQ, SHC.LEQ, SHC.GEQ, SHC.AND, SHC.OR,
-        SHC.ADD, SHC.SUBTRACT, SHC.MULTIPLY, SHC.DIVIDE, SHC.MOD,
-        SHC.ASSIGN, SHC.LESS, SHC.GREATER, SHC.NOT, SHC.AMP,
-        SHC.LPAREN, SHC.RPAREN, SHC.LSQUARE, SHC.RSQUARE, SHC.LCURL, SHC.RCURL,
-        SHC.COMMA, SHC.SEMICOLON, SHC.COLON
-	};
+    private static final SHC[] SYMBOL_TOKENS = {
+            SHC.EQUAL, SHC.NEQ, SHC.LEQ, SHC.GEQ, SHC.AND, SHC.OR,     // 0..5
+            SHC.ADD, SHC.SUBTRACT, SHC.MULTIPLY, SHC.DIVIDE, SHC.MOD,  // 6..10
+            SHC.ASSIGN, SHC.LESS, SHC.GREATER, SHC.NOT, SHC.CARET, SHC.CARET, // 11..16
+            SHC.LPAREN, SHC.RPAREN, SHC.LSQUARE, SHC.RSQUARE, SHC.LCURL, SHC.RCURL, // 17..22
+            SHC.COMMA, SHC.SEMICOLON, SHC.COLON                        // 23..25
+    };
 
     //Constructor for scanner class
     SHCScanner(String filename) {

@@ -4,63 +4,37 @@
  * @author Alec Kingsley
  */
 public final class Function extends Parsable {
-	/** return type of function */
-	private SHC returnType;
+    private SHC returnType;
+    private int nReturnReferences; // number of leading ^ on return type
+    private String name;
+    private Variable[] arguments;
+    private Variable[] localVariables;
+    private Statement[] body;
 
-	/** name of the function */
-	private String name;
+    // New canonical ctor including return pointer depth
+    public Function(SHC returnType, int nReturnReferences, String name,
+                    Variable[] arguments, Variable[] localVariables, Statement[] body,
+                    int lineIdx, int charIdx) {
+        super(lineIdx, charIdx);
+        this.returnType = returnType;
+        this.nReturnReferences = Math.max(0, nReturnReferences);
+        this.name = name;
+        this.arguments = arguments;
+        this.localVariables = localVariables;
+        this.body = body;
+    }
 
-	/** arguments */
-	private Variable[] arguments;
+    // Back-compat ctor (no return hats) if you still call it anywhere:
+    public Function(SHC returnType, String name,
+                    Variable[] arguments, Variable[] localVariables, Statement[] body,
+                    int lineIdx, int charIdx) {
+        this(returnType, 0, name, arguments, localVariables, body, lineIdx, charIdx);
+    }
 
-	/** local variables */
-	private Variable[] localVariables;
-
-	/** ordered statements in method */
-	private Statement[] body;
-
-	/**
-	 * Constructor for a local method call.
-	 *
-	 * @param returnType - return type of the function
-	 * @param name - name of the method
-	 * @param arguments - the arguments of the method
-	 * @param localVariables - the local variables defined in the section above the body
-	 * @param body - the body of the method
-	 * @param lineIdx - index of the line {@code Parsable} starts at
-	 * @param charIdx - char index in the line {@code Parsable} starts at
-	 */
-	public Function(SHC returnType, String name, Variable[] arguments, Variable[] localVariables, Statement[] body, int lineIdx, int charIdx) {
-		super(lineIdx, charIdx);
-		this.returnType = returnType;
-		this.name = name;
-		this.arguments = arguments;
-		this.localVariables = localVariables;
-		this.body = body;
-	}
-
-	/** getter method for {@code returnType} */
-	public SHC getReturnType() {
-		return returnType;
-	}
-
-	/** getter method for {@code name} */
-	public String getName() {
-		return name;
-	}
-
-	/** getter method for {@code arguments} */
-	public Variable[] getArguments() {
-		return arguments;
-	}
-
-	/** getter method for {@code localVariables} */
-	public Variable[] getLocalVariables() {
-		return localVariables;
-	}
-
-	/** getter method for {@code body} */
-	public Statement[] getBody() {
-		return body;
-	}
+    public SHC getReturnType() { return returnType; }
+    public int getNReturnReferences() { return nReturnReferences; }
+    public String getName() { return name; }
+    public Variable[] getArguments() { return arguments; }
+    public Variable[] getLocalVariables() { return localVariables; }
+    public Statement[] getBody() { return body; }
 }
