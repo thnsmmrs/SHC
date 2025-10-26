@@ -372,3 +372,73 @@ fun readChar() : void {
     token_int_value = value;
     current_token = TOKEN_CHAR_LITERAL();
 }
+
+/**
+ * Try to read operator or punctuation symbol.
+ * Uses maximal munch for multi-character operators.
+ */
+fun readSymbol() : int {
+    c1 : char;
+    c2 : char;
+
+    c1 = peekChar();
+    c2 = peekAhead(1);
+
+    if (c1 == '=' && c2 == '=') {
+        advance(2);
+        current_token = TOKEN_EQUAL();
+        return 1;
+    }
+
+    if (c1 == '!' && c2 == '=') {
+        advance(2);
+        current_token = TOKEN_NEQ();
+        return 1;
+    }
+
+    if (c1 == '<' && c2 == '=') {
+        advance(2);
+        current_token = TOKEN_LEQ();
+        return 1;
+    }
+
+    if (c1 == '>' && c2 == '=') {
+        advance(2);
+        current_token = TOKEN_GEQ();
+        return 1;
+    }
+
+    if (c1 == '&' && c2 == '&') {
+        advance(2);
+        current_token = TOKEN_AND();
+        return 1;
+    }
+
+    if (c1 == '|' && c2 == '|') {
+        advance(2);
+        current_token = TOKEN_OR();
+        return 1;
+    }
+
+    if (c1 == '+') { advance(1); current_token = TOKEN_ADD(); return 1; }
+    if (c1 == '-') { advance(1); current_token = TOKEN_SUBTRACT(); return 1; }
+    if (c1 == '*') { advance(1); current_token = TOKEN_MULTIPLY(); return 1; }
+    if (c1 == '/') { advance(1); current_token = TOKEN_DIVIDE(); return 1; }
+    if (c1 == '%') { advance(1); current_token = TOKEN_MOD(); return 1; }
+    if (c1 == '=') { advance(1); current_token = TOKEN_ASSIGN(); return 1; }
+    if (c1 == '<') { advance(1); current_token = TOKEN_LESS(); return 1; }
+    if (c1 == '>') { advance(1); current_token = TOKEN_GREATER(); return 1; }
+    if (c1 == '!') { advance(1); current_token = TOKEN_NOT(); return 1; }
+    if (c1 == '&') { advance(1); current_token = TOKEN_AMP(); return 1; }
+    if (c1 == '(') { advance(1); current_token = TOKEN_LPAREN(); return 1; }
+    if (c1 == ')') { advance(1); current_token = TOKEN_RPAREN(); return 1; }
+    if (c1 == '[') { advance(1); current_token = TOKEN_LSQUARE(); return 1; }
+    if (c1 == ']') { advance(1); current_token = TOKEN_RSQUARE(); return 1; }
+    if (c1 == '{') { advance(1); current_token = TOKEN_LCURL(); return 1; }
+    if (c1 == '}') { advance(1); current_token = TOKEN_RCURL(); return 1; }
+    if (c1 == ',') { advance(1); current_token = TOKEN_COMMA(); return 1; }
+    if (c1 == ';') { advance(1); current_token = TOKEN_SEMICOLON(); return 1; }
+    if (c1 == ':') { advance(1); current_token = TOKEN_COLON(); return 1; }
+
+    return 0;
+}
