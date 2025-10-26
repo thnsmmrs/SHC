@@ -175,3 +175,71 @@ fun skipWhitespace() : void {
         c = peekChar();
     }
 }
+
+/**
+ * Compare two strings for equality.
+ *
+ * @param s1 - first string
+ * @param s2 - second string
+ */
+fun strEqual(s1 : ^char, s2 : ^char) : int {
+    i : int;
+    i = 0;
+
+    while (^(s1 + i) != '\0' && ^(s2 + i) != '\0') {
+        if (^(s1 + i) != ^(s2 + i)) {
+            return 0;
+        }
+        i = i + 1;
+    }
+
+    return (^(s1 + i) == '\0' && ^(s2 + i) == '\0');
+}
+
+/**
+ * Check if identifier matches a keyword.
+ *
+ * @param ident - identifier to check
+ */
+fun matchKeyword(ident : ^char) : int {
+    if (strEqual(ident, "fun")) { return TOKEN_FUN(); }
+    if (strEqual(ident, "if")) { return TOKEN_IF(); }
+    if (strEqual(ident, "else")) { return TOKEN_ELSE(); }
+    if (strEqual(ident, "while")) { return TOKEN_WHILE(); }
+    if (strEqual(ident, "return")) { return TOKEN_RETURN(); }
+    if (strEqual(ident, "break")) { return TOKEN_BREAK(); }
+    if (strEqual(ident, "continue")) { return TOKEN_CONTINUE(); }
+    if (strEqual(ident, "void")) { return TOKEN_VOID(); }
+    if (strEqual(ident, "int")) { return TOKEN_INT(); }
+    if (strEqual(ident, "char")) { return TOKEN_CHAR(); }
+    if (strEqual(ident, "true")) { return TOKEN_TRUE(); }
+    if (strEqual(ident, "false")) { return TOKEN_FALSE(); }
+
+    return TOKEN_ID();
+}
+
+/**
+ * Read identifier or keyword token.
+ */
+fun readIdentifier() : void {
+    i : int;
+    c : char;
+
+    i = 0;
+    c = peekChar();
+
+    if (!isIdentStart(c)) {
+        current_token = TOKEN_ERROR();
+        return;
+    }
+
+    while (isIdentPart(c) && i < 255) {
+        ^(token_value + i) = c;
+        i = i + 1;
+        advance(1);
+        c = peekChar();
+    }
+
+    ^(token_value + i) = '\0';
+    current_token = matchKeyword(token_value);
+}
