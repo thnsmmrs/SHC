@@ -45,9 +45,10 @@ public class Compiler {
    * Compile a list of functions.
    *
    * @param program  - the program to compile
+   * @param globals  - global variables
    * @param filename - the filename to output to
    */
-  public static void compile(ArrayList<Function> program, String filename, Reporter reporter) {
+  public static void compile(ArrayList<Function> program, ArrayList<Variable> globals, String filename, Reporter reporter) {
     try {
       outputFileOutputStream = new FileOutputStream(filename);
     } catch (IOException e) {
@@ -58,6 +59,29 @@ public class Compiler {
     output("#include <stdio.h>\n");
     output("#include <stdlib.h>\n");
     output("#include <stdint.h>\n\n");
+
+    // Output global variables
+    for (Variable var : globals) {
+      switch (var.getType()) {
+        case INT:
+          output("uint64_t");
+          break;
+        case CHAR:
+          output("uint8_t");
+          break;
+        case VOID:
+          output("void");
+          break;
+      }
+      for (int i = 0; i < var.getNReferences(); i++) {
+        output(" *");
+      }
+      output(" " + var.getName() + ";\n");
+    }
+    if (globals.size() > 0) {
+      output("\n");
+    }
+
     for (Function function : program) {
       compileFunction(function);
     }

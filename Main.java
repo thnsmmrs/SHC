@@ -84,7 +84,7 @@ public final class Main {
 
       System.out.println("Output file: " + filename + ".c");
 
-      Compiler.compile(funs, filename + ".c", new Reporter(filename));
+      Compiler.compile(funs, parser.getGlobalVariables(), filename + ".c", new Reporter(filename));
 
       System.out.println(sep("DONE " + filename));
     }

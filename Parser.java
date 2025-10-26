@@ -12,6 +12,10 @@ public final class Parser {
     this.rep = new Reporter(filename);
   }
 
+  public ArrayList<Variable> getGlobalVariables() {
+    return globalVariables;
+  }
+
   // ===================== translation-unit =====================
 
   public ArrayList<Function> parseProgram() {

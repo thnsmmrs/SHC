@@ -559,3 +559,72 @@ fun compileFunction(funcNode : ^int) : void {
 
     appendString("}\n");
 }
+
+// file I/O helpers
+fun readFile(filename : ^char) : ^char {
+    file : ^char;
+    buffer : ^char;
+    size : int;
+    bytesRead : int;
+
+    // fopen, fseek, ftell, fread, fclose are C stdlib funcs
+    file = fopen(filename, "r");
+    if (file == 0) {
+        puts("Error: cannot open file");
+        return 0;
+    }
+
+    // get file size
+    fseek(file, 0, 2);  // SEEK_END = 2
+    size = ftell(file);
+    fseek(file, 0, 0);  // SEEK_SET = 0
+
+    // alloc buffer
+    buffer = malloc(size + 1);
+
+    // read file
+    bytesRead = fread(buffer, 1, size, file);
+
+    // null terminate
+    temp : ^char;
+    temp = buffer + bytesRead;
+    ^temp = 0;
+
+    fclose(file);
+    return buffer;
+}
+
+// main entry - wire everything together
+fun main(argc : int, argv : ^^char) : int {
+    source : ^char;
+    functionCount : int;
+    argPtr : ^^char;
+    filename : ^char;
+
+    // check args
+    if (argc < 2) {
+        puts("Usage: shc_compiler <file.shc>");
+        return 1;
+    }
+
+    // get filename from argv[1]
+    argPtr = argv + 1;
+    filename = ^argPtr;
+
+    // read source file
+    source = readFile(filename);
+    if (source == 0) {
+        return 1;
+    }
+
+    // init scanner
+    initScanner(source);
+
+    // parse program
+    functionCount = parseProgram(source);
+
+    // compile to C
+    compile(parser_functions, functionCount);
+
+    return 0;
+}

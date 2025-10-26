@@ -85,7 +85,9 @@ fun initScanner(buffer : ^char) : void {
  * Get current character without advancing.
  */
 fun peekChar() : char {
-    return ^(input_buffer + current_pos);
+    temp : ^char;
+    temp = input_buffer + current_pos;
+    return ^temp;
 }
 
 /**
@@ -94,7 +96,9 @@ fun peekChar() : char {
  * @param offset - number of positions ahead
  */
 fun peekAhead(offset : int) : char {
-    return ^(input_buffer + current_pos + offset);
+    temp : ^char;
+    temp = input_buffer + current_pos + offset;
+    return ^temp;
 }
 
 /**
@@ -166,7 +170,7 @@ fun skipWhitespace() : void {
     c : char;
     c = peekChar();
 
-    while (!atEnd() && isWhitespace(c)) {
+    while (atEnd() == 0 && isWhitespace(c)) {
         if (c == '\n') {
             line_number = line_number + 1;
             char_position = 0;
@@ -184,16 +188,30 @@ fun skipWhitespace() : void {
  */
 fun strEqual(s1 : ^char, s2 : ^char) : int {
     i : int;
+    temp1 : ^char;
+    temp2 : ^char;
+    c1 : char;
+    c2 : char;
+
     i = 0;
 
-    while (^(s1 + i) != '\0' && ^(s2 + i) != '\0') {
-        if (^(s1 + i) != ^(s2 + i)) {
+    while (1) {
+        temp1 = s1 + i;
+        temp2 = s2 + i;
+        c1 = ^temp1;
+        c2 = ^temp2;
+
+        if (c1 == '\0' || c2 == '\0') {
+            break;
+        }
+
+        if (c1 != c2) {
             return 0;
         }
         i = i + 1;
     }
 
-    return (^(s1 + i) == '\0' && ^(s2 + i) == '\0');
+    return (c1 == '\0' && c2 == '\0');
 }
 
 /**
@@ -228,19 +246,23 @@ fun readIdentifier() : void {
     i = 0;
     c = peekChar();
 
-    if (!isIdentStart(c)) {
+    if (isIdentStart(c) == 0) {
         current_token = TOKEN_ERROR();
         return;
     }
 
     while (isIdentPart(c) && i < 255) {
-        ^(token_value + i) = c;
+        temp : ^char;
+        temp = token_value + i;
+        ^temp = c;
         i = i + 1;
         advance(1);
         c = peekChar();
     }
 
-    ^(token_value + i) = '\0';
+    temp : ^char;
+    temp = token_value + i;
+    ^temp = '\0';
     current_token = matchKeyword(token_value);
 }
 
@@ -265,7 +287,7 @@ fun readNumber() : void {
         return;
     }
 
-    if (!isDigit(c)) {
+    if (isDigit(c) == 0) {
         current_token = TOKEN_ERROR();
         return;
     }
@@ -314,13 +336,15 @@ fun readString() : void {
     c = peekChar();
 
     while (c != '"' && c != '\0' && c != '\n' && i < 255) {
+        temp : ^char;
+        temp = token_value + i;
         if (c == '\\') {
-            ^(token_value + i) = readEscape();
+            ^temp = readEscape();
             if (current_token == TOKEN_ERROR()) {
                 return;
             }
         } else {
-            ^(token_value + i) = c;
+            ^temp = c;
             advance(1);
         }
         i = i + 1;
@@ -333,7 +357,9 @@ fun readString() : void {
     }
 
     advance(1);
-    ^(token_value + i) = '\0';
+    temp : ^char;
+    temp = token_value + i;
+    ^temp = '\0';
     current_token = TOKEN_STRING_LITERAL();
 }
 
@@ -397,7 +423,7 @@ fun skipBlockComment() : void {
     advance(2);
     c = peekChar();
 
-    while (!atEnd()) {
+    while (atEnd() == 0) {
         if (c == '*' && peekAhead(1) == '/') {
             advance(2);
             return;
