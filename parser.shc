@@ -1161,6 +1161,425 @@ fun parseExpression() : ^int {
     return parseOrExpression();
 }
 
+/* ============================================================================
+ * STATEMENT PARSING FUNCTIONS
+ * ============================================================================ */
+
+/**
+ * Check if current token can start a statement.
+ * @return 1 if token can start statement, 0 otherwise
+ */
+fun isStatementStart() : int {
+    if (match(TOKEN_IF())) { return 1; }
+    if (match(TOKEN_WHILE())) { return 1; }
+    if (match(TOKEN_RETURN())) { return 1; }
+    if (match(TOKEN_BREAK())) { return 1; }
+    if (match(TOKEN_CONTINUE())) { return 1; }
+    if (match(TOKEN_LCURL())) { return 1; }
+    if (match(TOKEN_ID())) { return 1; }
+    if (match(TOKEN_SEMICOLON())) { return 1; }
+    if (match(TOKEN_MULTIPLY())) { return 1; }  // For ^var = expr
+    return 0;
+}
+
+/**
+ * Parse a sequence of statements until a closing brace or end of input.
+ * @return array of statement pointers and count via parser state
+ */
+fun parseStatementSequence() : ^^int {
+    stmts : ^^int;
+    stmtCapacity : int;
+    stmtCount : int;
+    stmt : ^int;
+    temp : ^^int;
+
+    // Allocate initial array
+    stmtCapacity = 16;
+    stmts = malloc(stmtCapacity * 8);
+    stmtCount = 0;
+
+    // Parse statements while we can
+    while (isStatementStart()) {
+        // Grow array if needed
+        if (stmtCount >= stmtCapacity) {
+            stmtCapacity = stmtCapacity * 2;
+            // TODO: realloc stmts array
+        }
+
+        // Parse statement and add to array
+        stmt = parseStatement();
+        temp = stmts + stmtCount;
+        ^temp = stmt;
+        stmtCount = stmtCount + 1;
+    }
+
+    // Store count in parser state (reuse local var count for now)
+    parser_local_var_count = stmtCount;
+    return stmts;
+}
+
+/**
+ * Parse a block of statements: { stmt* }
+ * @return array of statement pointers
+ */
+fun parseBlock() : ^^int {
+    stmts : ^^int;
+
+    expect(TOKEN_LCURL(), "Expected '{'");
+    stmts = parseStatementSequence();
+    expect(TOKEN_RCURL(), "Expected '}'");
+
+    return stmts;
+}
+
+/**
+ * Parse a statement or block (for if/while bodies).
+ * @return array of statement pointers
+ */
+fun parseStatementOrBlock() : ^^int {
+    stmts : ^^int;
+    stmt : ^int;
+    temp : ^^int;
+
+    if (match(TOKEN_LCURL())) {
+        return parseBlock();
+    }
+
+    // Single statement - wrap in array
+    stmts = malloc(8);  // Single pointer
+    stmt = parseStatement();
+    temp = stmts;
+    ^temp = stmt;
+    parser_local_var_count = 1;
+    return stmts;
+}
+
+/**
+ * Parse an if statement: if (cond) stmt [else stmt]
+ * @return if statement node
+ */
+fun parseIfStatement() : ^int {
+    node : ^int;
+    cond : ^int;
+    thenBlock : ^^int;
+    thenCount : int;
+    elseBlock : ^^int;
+    elseCount : int;
+
+    expect(TOKEN_IF(), "Expected 'if'");
+    expect(TOKEN_LPAREN(), "Expected '('");
+    cond = parseExpression();
+    expect(TOKEN_RPAREN(), "Expected ')'");
+
+    thenBlock = parseStatementOrBlock();
+    thenCount = parser_local_var_count;
+
+    // Check for else clause
+    elseCount = 0;
+    if (match(TOKEN_ELSE())) {
+        parserNextToken();
+        elseBlock = parseStatementOrBlock();
+        elseCount = parser_local_var_count;
+    }
+
+    // Create if statement node
+    node = allocStatement(NODE_STMT_IF(), STMT_IF_SIZE());
+    setIfCondition(node, cond);
+    setIfThen(node, thenBlock);
+    setIfThenCount(node, thenCount);
+    setIfElse(node, elseBlock);
+    setIfElseCount(node, elseCount);
+
+    return node;
+}
+
+/**
+ * Parse a while statement: while (cond) stmt
+ * @return while statement node
+ */
+fun parseWhileStatement() : ^int {
+    node : ^int;
+    cond : ^int;
+    body : ^^int;
+    bodyCount : int;
+
+    expect(TOKEN_WHILE(), "Expected 'while'");
+    expect(TOKEN_LPAREN(), "Expected '('");
+    cond = parseExpression();
+    expect(TOKEN_RPAREN(), "Expected ')'");
+
+    body = parseStatementOrBlock();
+    bodyCount = parser_local_var_count;
+
+    // Create while statement node
+    node = allocStatement(NODE_STMT_WHILE(), STMT_WHILE_SIZE());
+    setWhileCondition(node, cond);
+    setWhileBody(node, body);
+    setWhileBodyCount(node, bodyCount);
+
+    return node;
+}
+
+/**
+ * Parse a return statement: return [expr] ;
+ * @return return statement node
+ */
+fun parseReturnStatement() : ^int {
+    node : ^int;
+    value : ^int;
+    hasValue : int;
+
+    expect(TOKEN_RETURN(), "Expected 'return'");
+
+    hasValue = 0;
+    if (match(TOKEN_SEMICOLON()) == 0) {
+        hasValue = 1;
+        value = parseExpression();
+    }
+
+    expect(TOKEN_SEMICOLON(), "Expected ';'");
+
+    // Create return statement node
+    node = allocStatement(NODE_STMT_RETURN(), STMT_RETURN_SIZE());
+    setReturnHasValue(node, hasValue);
+    if (hasValue) {
+        setReturnValue(node, value);
+    }
+
+    return node;
+}
+
+/**
+ * Parse a break statement: break ;
+ * @return break statement node
+ */
+fun parseBreakStatement() : ^int {
+    node : ^int;
+
+    expect(TOKEN_BREAK(), "Expected 'break'");
+    expect(TOKEN_SEMICOLON(), "Expected ';'");
+
+    node = allocStatement(NODE_STMT_BREAK(), STMT_SIMPLE_SIZE());
+    return node;
+}
+
+/**
+ * Parse a continue statement: continue ;
+ * @return continue statement node
+ */
+fun parseContinueStatement() : ^int {
+    node : ^int;
+
+    expect(TOKEN_CONTINUE(), "Expected 'continue'");
+    expect(TOKEN_SEMICOLON(), "Expected ';'");
+
+    node = allocStatement(NODE_STMT_CONTINUE(), STMT_SIMPLE_SIZE());
+    return node;
+}
+
+/**
+ * Parse a variable declaration: name : type ;
+ * @return declaration statement node
+ */
+fun parseDeclaration(name : ^char) : ^int {
+    node : ^int;
+    varNode : ^int;
+    baseType : int;
+    stars : int;
+
+    // Expect colon
+    expect(TOKEN_COLON(), "Expected ':'");
+
+    // Parse type (simplified - just handle int and char for now)
+    stars = 0;
+    if (match(TOKEN_MULTIPLY())) {  // ^ for pointer
+        stars = 1;
+        parserNextToken();
+    }
+
+    if (match(TOKEN_INT())) {
+        baseType = TOKEN_INT();
+        parserNextToken();
+    } else if (match(TOKEN_CHAR())) {
+        baseType = TOKEN_CHAR();
+        parserNextToken();
+    } else {
+        printError("Expected type", parser_token_line, parser_token_col);
+        baseType = TOKEN_INT();
+    }
+
+    expect(TOKEN_SEMICOLON(), "Expected ';'");
+
+    // Create variable node
+    varNode = allocVariable();
+    setVariableBaseType(varNode, baseType);
+    setVariableStars(varNode, stars);
+    setVariableName(varNode, name);
+
+    // Create declaration statement node
+    node = allocStatement(NODE_STMT_DECL(), STMT_DECL_SIZE());
+    setDeclVariable(node, varNode);
+
+    return node;
+}
+
+/**
+ * Parse an assignment statement: lhs = rhs ;
+ * @return assignment statement node
+ */
+fun parseAssignment(lhsExpr : ^int) : ^int {
+    node : ^int;
+    rhs : ^int;
+
+    expect(TOKEN_ASSIGN(), "Expected '='");
+    rhs = parseExpression();
+    expect(TOKEN_SEMICOLON(), "Expected ';'");
+
+    // Create assignment statement node
+    node = allocStatement(NODE_STMT_ASSIGN(), STMT_ASSIGN_SIZE());
+    setAssignLhs(node, lhsExpr);
+    setAssignRhs(node, rhs);
+
+    return node;
+}
+
+/**
+ * Parse a function call statement: name ( args ) ;
+ * @return call statement node
+ */
+fun parseCallStatement(name : ^char) : ^int {
+    node : ^int;
+    args : ^^int;
+    argCount : int;
+    argCapacity : int;
+    temp : ^^int;
+
+    expect(TOKEN_LPAREN(), "Expected '('");
+
+    // Parse argument list
+    argCapacity = 8;
+    args = malloc(argCapacity * 8);
+    argCount = 0;
+
+    if (match(TOKEN_RPAREN()) == 0) {
+        while (1) {
+            if (argCount >= argCapacity) {
+                argCapacity = argCapacity * 2;
+                // TODO: realloc
+            }
+
+            temp = args + argCount;
+            ^temp = parseExpression();
+            argCount = argCount + 1;
+
+            if (match(TOKEN_COMMA())) {
+                parserNextToken();
+            } else {
+                break;
+            }
+        }
+    }
+
+    expect(TOKEN_RPAREN(), "Expected ')'");
+    expect(TOKEN_SEMICOLON(), "Expected ';'");
+
+    // Create call statement node
+    node = allocStatement(NODE_STMT_CALL(), STMT_CALL_SIZE());
+    setStmtCallName(node, name);
+    setStmtCallArgs(node, args);
+    setStmtCallArgCount(node, argCount);
+
+    return node;
+}
+
+/**
+ * Parse a single statement.
+ * Dispatches to appropriate parser based on current token.
+ * @return statement node pointer
+ */
+fun parseStatement() : ^int {
+    name : ^char;
+    lhsExpr : ^int;
+
+    // Control flow statements
+    if (match(TOKEN_IF())) {
+        return parseIfStatement();
+    }
+    if (match(TOKEN_WHILE())) {
+        return parseWhileStatement();
+    }
+    if (match(TOKEN_RETURN())) {
+        return parseReturnStatement();
+    }
+    if (match(TOKEN_BREAK())) {
+        return parseBreakStatement();
+    }
+    if (match(TOKEN_CONTINUE())) {
+        return parseContinueStatement();
+    }
+
+    // Block statement
+    if (match(TOKEN_LCURL())) {
+        // Parse as single block statement (wrap first statement)
+        temp : ^^int;
+        temp = parseBlock();
+        // Return first statement from block
+        return ^temp;
+    }
+
+    // Empty statement
+    if (match(TOKEN_SEMICOLON())) {
+        parserNextToken();
+        // Return empty break as placeholder
+        return allocStatement(NODE_STMT_BREAK(), STMT_SIMPLE_SIZE());
+    }
+
+    // ID: could be declaration, assignment, or call
+    if (match(TOKEN_ID())) {
+        name = parser_token_value;
+        parserNextToken();
+
+        // Check for declaration: name : type
+        if (match(TOKEN_COLON())) {
+            return parseDeclaration(name);
+        }
+
+        // Check for call: name ( args )
+        if (match(TOKEN_LPAREN())) {
+            return parseCallStatement(name);
+        }
+
+        // Check for assignment: name = expr
+        if (match(TOKEN_ASSIGN())) {
+            // Create var expression for LHS
+            lhsExpr = allocExpression(NODE_EXPR_VAR(), EXPR_VAR_SIZE());
+            setVarName(lhsExpr, name);
+            setVarDerefCount(lhsExpr, 0);
+            return parseAssignment(lhsExpr);
+        }
+
+        printError("Expected ':', '(', or '=' after identifier", parser_token_line, parser_token_col);
+        return allocStatement(NODE_STMT_BREAK(), STMT_SIMPLE_SIZE());
+    }
+
+    // Pointer dereference assignment: ^var = expr
+    if (match(TOKEN_MULTIPLY())) {
+        parserNextToken();
+        lhsExpr = parsePrimaryExpression();
+        // Wrap in dereference
+        temp : ^int;
+        temp = allocExpression(NODE_EXPR_UNARY(), EXPR_UNARY_SIZE());
+        setUnaryOp(temp, TOKEN_MULTIPLY());
+        setUnaryOperand(temp, lhsExpr);
+        return parseAssignment(temp);
+    }
+
+    // Error: unexpected token
+    printError("Expected statement", parser_token_line, parser_token_col);
+    parser_error_count = parser_error_count + 1;
+    return allocStatement(NODE_STMT_BREAK(), STMT_SIMPLE_SIZE());
+}
+
 /**
  * Main parser entry point.
  * @param source - source code string
