@@ -1580,16 +1580,180 @@ fun parseStatement() : ^int {
     return allocStatement(NODE_STMT_BREAK(), STMT_SIMPLE_SIZE());
 }
 
+/* ============================================================================
+ * FUNCTION AND PROGRAM PARSING
+ * ============================================================================ */
+
+/**
+ * Parse a type specification: [^]* (int|char|void)
+ * Returns base type in parser_token_int and star count in parser_token_col
+ */
+fun parseType() : void {
+    stars : int;
+    baseType : int;
+
+    // Count pointer stars (^)
+    stars = 0;
+    while (match(TOKEN_MULTIPLY())) {  // ^ scans as MULTIPLY
+        stars = stars + 1;
+        parserNextToken();
+    }
+
+    // Parse base type
+    if (match(TOKEN_INT())) {
+        baseType = TOKEN_INT();
+        parserNextToken();
+    } else if (match(TOKEN_CHAR())) {
+        baseType = TOKEN_CHAR();
+        parserNextToken();
+    } else if (match(TOKEN_VOID())) {
+        baseType = TOKEN_VOID();
+        parserNextToken();
+    } else {
+        printError("Expected type (int, char, or void)", parser_token_line, parser_token_col);
+        baseType = TOKEN_INT();
+    }
+
+    // Store results in parser globals (hack to return multiple values)
+    parser_token_int = baseType;
+    parser_token_col = stars;
+}
+
+/**
+ * Parse a function parameter: name : type
+ * @return parameter (variable) node pointer
+ */
+fun parseParameter() : ^int {
+    name : ^char;
+    varNode : ^int;
+    baseType : int;
+    stars : int;
+
+    // Get parameter name
+    name = expectId();
+
+    // Expect colon
+    expect(TOKEN_COLON(), "Expected ':'");
+
+    // Parse type
+    parseType();
+    baseType = parser_token_int;
+    stars = parser_token_col;
+
+    // Create variable node for parameter
+    varNode = allocVariable();
+    setVariableBaseType(varNode, baseType);
+    setVariableStars(varNode, stars);
+    setVariableName(varNode, name);
+
+    return varNode;
+}
+
+/**
+ * Parse a complete function declaration.
+ * @return function node pointer
+ */
+fun parseFunction() : ^int {
+    funcNode : ^int;
+    name : ^char;
+    retType : int;
+    retStars : int;
+    params : ^^int;
+    paramCapacity : int;
+    paramCount : int;
+    body : ^^int;
+    bodyCount : int;
+    temp : ^^int;
+
+    // Expect 'fun' keyword
+    expect(TOKEN_FUN(), "Expected 'fun'");
+
+    // Get function name
+    name = expectId();
+
+    // Parse parameter list
+    expect(TOKEN_LPAREN(), "Expected '('");
+
+    paramCapacity = 8;
+    params = malloc(paramCapacity * 8);
+    paramCount = 0;
+
+    if (match(TOKEN_RPAREN()) == 0) {
+        // Parse parameters
+        while (1) {
+            if (paramCount >= paramCapacity) {
+                paramCapacity = paramCapacity * 2;
+                // TODO: realloc
+            }
+
+            temp = params + paramCount;
+            ^temp = parseParameter();
+            paramCount = paramCount + 1;
+
+            if (match(TOKEN_COMMA())) {
+                parserNextToken();
+            } else {
+                break;
+            }
+        }
+    }
+
+    expect(TOKEN_RPAREN(), "Expected ')'");
+
+    // Parse return type
+    expect(TOKEN_COLON(), "Expected ':'");
+    parseType();
+    retType = parser_token_int;
+    retStars = parser_token_col;
+
+    // Parse function body
+    body = parseBlock();
+    bodyCount = parser_local_var_count;
+
+    // Create function node
+    funcNode = allocFunction();
+    setFunctionRetType(funcNode, retType);
+    setFunctionRetStars(funcNode, retStars);
+    setFunctionName(funcNode, name);
+    setFunctionParams(funcNode, params);
+    setFunctionParamCount(funcNode, paramCount);
+    setFunctionBody(funcNode, body);
+    setFunctionBodyCount(funcNode, bodyCount);
+
+    return funcNode;
+}
+
 /**
  * Main parser entry point.
  * @param source - source code string
  * @return number of functions parsed (0 if error)
  */
 fun parseProgram(source : ^char) : int {
+    funcNode : ^int;
+    temp : ^^int;
+
     initParser(source);
 
-    // TODO: implement program parsing
-    // For now, just a placeholder
+    // Parse all functions
+    while (match(TOKEN_FUN())) {
+        // Grow array if needed
+        if (parser_function_count >= parser_function_capacity) {
+            parser_function_capacity = parser_function_capacity * 2;
+            // TODO: realloc parser_functions
+        }
+
+        // Parse function and add to array
+        funcNode = parseFunction();
+        temp = parser_functions + parser_function_count;
+        ^temp = funcNode;
+        parser_function_count = parser_function_count + 1;
+    }
+
+    // Check for end of input
+    if (match(TOKEN_EOS()) == 0) {
+        printError("Expected end of input or function declaration", parser_token_line, parser_token_col);
+        parser_error_count = parser_error_count + 1;
+    }
 
     return parser_function_count;
 }
