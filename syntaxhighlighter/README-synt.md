@@ -1,8 +1,8 @@
-## VS Code Syntax Highlighter for SHC
+# VS Code Syntax Highlighter for SHC
 To install locally:
 1. Navigate to `vscode-extension` folder.
 2. Run:
-   ```bash
+
    npm install -g vsce
    vsce package
    code --install-extension shc-0.0.1.vsix
