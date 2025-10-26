@@ -8,19 +8,20 @@ public final class MultiplicativeExpression extends Parsable {
 	private MultiplicativeExpression left = null;
 	/** operator for expression */
 	private SHC operator;
-  /** right of expression */
-  private UnaryExpression right;
-  
+	/** right of expression */
+	private UnaryExpression right;
+
 	/**
 	 * Constructor for the {@code MultiplicativeExpression} class.
 	 *
-	 * @param left - the left of the expression
+	 * @param left     - the left of the expression
 	 * @param operator - the operator of the expression
-	 * @param right - the right of the expression
-	 * @param lineIdx - index of the line {@code Parsable} starts at
-	 * @param charIdx - char index in the line {@code Parsable} starts at
+	 * @param right    - the right of the expression
+	 * @param lineIdx  - index of the line {@code Parsable} starts at
+	 * @param charIdx  - char index in the line {@code Parsable} starts at
 	 */
-	public MultiplicativeExpression(MultiplicativeExpression left, SHC operator, UnaryExpression right, int lineIdx, int charIdx) {
+	public MultiplicativeExpression(MultiplicativeExpression left, SHC operator, UnaryExpression right, int lineIdx,
+			int charIdx) {
 		super(lineIdx, charIdx);
 		this.left = left;
 		this.operator = operator;
@@ -30,7 +31,7 @@ public final class MultiplicativeExpression extends Parsable {
 	/**
 	 * Constructor for the {@code MultiplicativeExpression} class.
 	 *
-	 * @param value - the value of the expression (no operator)
+	 * @param value   - the value of the expression (no operator)
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
@@ -63,9 +64,9 @@ public final class MultiplicativeExpression extends Parsable {
 	}
 
 	/** getter method for {@code right} */
-  public UnaryExpression getRight() {
-  	return right;
-  }
+	public UnaryExpression getRight() {
+		return right;
+	}
 
 	@Override
 	public String toString() {

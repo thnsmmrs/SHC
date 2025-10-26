@@ -6,14 +6,14 @@
 public final class OrExpression extends Parsable {
 	/** left of expression */
 	private OrExpression left = null;
-  /** right of expression */
-  private AndExpression right;
-  
+	/** right of expression */
+	private AndExpression right;
+
 	/**
 	 * Constructor for the {@code OrExpression} class.
 	 *
-	 * @param left - the left of the expression
-	 * @param right - the right of the expression
+	 * @param left    - the left of the expression
+	 * @param right   - the right of the expression
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
@@ -26,7 +26,7 @@ public final class OrExpression extends Parsable {
 	/**
 	 * Constructor for the {@code OrExpression} class.
 	 *
-	 * @param value - the value of the expression (no operator)
+	 * @param value   - the value of the expression (no operator)
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
@@ -51,9 +51,9 @@ public final class OrExpression extends Parsable {
 	}
 
 	/** getter method for {@code right} */
-  public AndExpression getRight() {
-  	return right;
-  }
+	public AndExpression getRight() {
+		return right;
+	}
 
 	@Override
 	public String toString() {

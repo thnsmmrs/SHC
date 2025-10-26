@@ -8,19 +8,20 @@ public final class EqualityExpression extends Parsable {
 	private EqualityExpression left = null;
 	/** operator for expression */
 	private SHC operator;
-  /** right of expression */
-  private RelationalExpression right;
-  
+	/** right of expression */
+	private RelationalExpression right;
+
 	/**
 	 * Constructor for the {@code EqualityExpression} class.
 	 *
-	 * @param left - the left of the expression
+	 * @param left     - the left of the expression
 	 * @param operator - the operator of the expression
-	 * @param right - the right of the expression
-	 * @param lineIdx - index of the line {@code Parsable} starts at
-	 * @param charIdx - char index in the line {@code Parsable} starts at
+	 * @param right    - the right of the expression
+	 * @param lineIdx  - index of the line {@code Parsable} starts at
+	 * @param charIdx  - char index in the line {@code Parsable} starts at
 	 */
-	public EqualityExpression(EqualityExpression left, SHC operator, RelationalExpression right, int lineIdx, int charIdx) {
+	public EqualityExpression(EqualityExpression left, SHC operator, RelationalExpression right, int lineIdx,
+			int charIdx) {
 		super(lineIdx, charIdx);
 		this.left = left;
 		this.operator = operator;
@@ -30,7 +31,7 @@ public final class EqualityExpression extends Parsable {
 	/**
 	 * Constructor for the {@code EqualityExpression} class.
 	 *
-	 * @param value - the value of the expression (no operator)
+	 * @param value   - the value of the expression (no operator)
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
@@ -63,9 +64,9 @@ public final class EqualityExpression extends Parsable {
 	}
 
 	/** getter method for {@code right} */
-  public RelationalExpression getRight() {
-  	return right;
-  }
+	public RelationalExpression getRight() {
+		return right;
+	}
 
 	@Override
 	public String toString() {

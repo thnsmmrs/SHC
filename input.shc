@@ -1,14 +1,20 @@
 fun main(): int {
-  len : int = 100;
-  buf : ^char = malloc(len);
-  val : ^char = ^buf;
-  i: int = 0;
+  len: int;
+  len = 100;
+  buf: ^char;
+  ^buf = malloc(len);
+  val: ^char;
+  ^val = ^buf;
+  i: int;
+  i = 0;
   while (i < len) {
     ^val = ^val + 1;
     val = 'A';
     i = i + 1;
   }
-  print(^buf);
+
+  puts(^buf);
+  free(^buf);
 
   return 0;
 }

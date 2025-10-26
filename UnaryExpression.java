@@ -8,18 +8,19 @@ public final class UnaryExpression extends Parsable {
 	private UnaryExpression unaryExpression = null;
 	/** operator */
 	private SHC operator;
-  /** right of expression */
-  private Factor factor = null;
+	/** right of expression */
+	private Factor factor = null;
 
 	/**
 	 * Constructor for the {@code UnaryExpression} class.
-	 * @param operator - the operator used on expression
+	 * 
+	 * @param operator   - the operator used on expression
 	 * @param expression - the expression
-	 * @param lineIdx - index of the line {@code Parsable} starts at
-	 * @param charIdx - char index in the line {@code Parsable} starts at
+	 * @param lineIdx    - index of the line {@code Parsable} starts at
+	 * @param charIdx    - char index in the line {@code Parsable} starts at
 	 */
 	public UnaryExpression(SHC operator, UnaryExpression expression,
-												 int lineIdx, int charIdx) {
+			int lineIdx, int charIdx) {
 		super(lineIdx, charIdx);
 		this.operator = operator;
 		this.unaryExpression = expression;
@@ -27,12 +28,13 @@ public final class UnaryExpression extends Parsable {
 
 	/**
 	 * Constructor for the {@code UnaryExpression} class.
+	 * 
 	 * @param expression - the expression
-	 * @param lineIdx - index of the line {@code Parsable} starts at
-	 * @param charIdx - char index in the line {@code Parsable} starts at
+	 * @param lineIdx    - index of the line {@code Parsable} starts at
+	 * @param charIdx    - char index in the line {@code Parsable} starts at
 	 */
 	public UnaryExpression(Factor expression,
-												 int lineIdx, int charIdx) {
+			int lineIdx, int charIdx) {
 		super(lineIdx, charIdx);
 		this.factor = expression;
 	}
@@ -72,10 +74,8 @@ public final class UnaryExpression extends Parsable {
 	public String toString() {
 		if (hasOperator()) {
 			String op = switch (operator) {
-				case NOT -> "!";
+				case ADD -> "+";
 				case SUBTRACT -> "-";
-				case AMP -> "&";
-				case MULTIPLY -> "^";
 				default -> "?";
 			};
 			return op + unaryExpression.toString();

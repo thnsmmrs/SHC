@@ -6,14 +6,14 @@
 public final class AndExpression extends Parsable {
 	/** left of expression */
 	private AndExpression left = null;
-  /** right of expression */
-  private EqualityExpression right;
-  
+	/** right of expression */
+	private EqualityExpression right;
+
 	/**
 	 * Constructor for the {@code AndExpression} class.
 	 *
-	 * @param left - the left of the expression
-	 * @param right - the right of the expression
+	 * @param left    - the left of the expression
+	 * @param right   - the right of the expression
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
@@ -26,7 +26,7 @@ public final class AndExpression extends Parsable {
 	/**
 	 * Constructor for the {@code AndExpression} class.
 	 *
-	 * @param value - the value of the expression (no operator)
+	 * @param value   - the value of the expression (no operator)
 	 * @param lineIdx - index of the line {@code Parsable} starts at
 	 * @param charIdx - char index in the line {@code Parsable} starts at
 	 */
@@ -51,9 +51,9 @@ public final class AndExpression extends Parsable {
 	}
 
 	/** getter method for {@code right} */
-  public EqualityExpression getRight() {
-  	return right;
-  }
+	public EqualityExpression getRight() {
+		return right;
+	}
 
 	@Override
 	public String toString() {
