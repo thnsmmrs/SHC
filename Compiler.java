@@ -291,10 +291,20 @@ public class Compiler {
   public static void compileAssignment(Assignment assignment) {
     if (assignment.hasAssignee()) {
       var assignee = assignment.getAssignee();
-      int stars = assignee.getVariable().getNReferences() - assignee.getNReferences();
-      for (int i = 0; i < stars; i++) {
-        output("*");
+      // Only dereference if assignee is actually being dereferenced (has ^)
+      // Don't dereference for simple pointer assignment
+      int varRefs = assignee.getVariable().getNReferences();
+      int assigneeRefs = assignee.getNReferences();
+
+      if (assigneeRefs > 0) {
+        // This is dereferencing (^temp = ...), add appropriate stars
+        int stars = varRefs - assigneeRefs;
+        for (int i = 0; i < stars; i++) {
+          output("*");
+        }
       }
+      // else: plain assignment (temp = ...), no stars needed
+
       output(assignee.getVariable().getName());
       output(" = ");
     }
@@ -424,16 +434,14 @@ public class Compiler {
   public static void compileFactor(Factor factor) {
     switch (factor) {
       case Factor.Var varFactor:
-        int stars = varFactor.getVariable().getNReferences() - varFactor.getNReferences();
-        if (stars < 0) {
-          if (stars < -1) {
-            reporter.printError("invalid number of ^ on variable");
-          }
-          output("&");
-        } else {
-          for (int i = 0; i < stars; i++) {
-            output("*");
-          }
+        // In SHC: variable `x : ^char` is a pointer
+        // Using `x` gives pointer value → C: `x` (0 stars)
+        // Using `^x` dereferences → C: `*x` (1 star)
+        // The number of stars in C = number of ^ in SHC usage
+        int usageRefs = varFactor.getNReferences();
+
+        for (int i = 0; i < usageRefs; i++) {
+          output("*");
         }
         output(varFactor.getVariable().getName());
         break;
@@ -441,7 +449,14 @@ public class Compiler {
         output("" + constFactor.constant());
         break;
       case Factor.Str strFactor:
-        output("\"" + strFactor.string() + "\"");
+        // Escape special characters for C string literal
+        String escaped = strFactor.string()
+          .replace("\\", "\\\\")
+          .replace("\n", "\\n")
+          .replace("\r", "\\r")
+          .replace("\t", "\\t")
+          .replace("\"", "\\\"");
+        output("\"" + escaped + "\"");
         break;
       case Factor.Parentheses parenthesesFactor:
         output("(");
